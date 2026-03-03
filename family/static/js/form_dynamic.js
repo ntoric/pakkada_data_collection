@@ -239,6 +239,54 @@
                 });
             });
         }
+
+        /* ── Pre-fill for edit mode ────────────────────────────────────────── */
+        const prefillEl = document.getElementById('prefillData');
+        if (prefillEl) {
+            const prefill = JSON.parse(prefillEl.textContent);
+
+            (prefill.children || []).forEach(function (child) {
+                addChild();
+                const items = document.querySelectorAll('#childrenContainer .dynamic-item');
+                const item = items[items.length - 1];
+
+                const selectEl = item.querySelector('.child-relation-select');
+                const nameEl = item.querySelector('[name="child_name"]');
+                const mobEl = item.querySelector('[name="child_mobile"]');
+                const wifeEl = item.querySelector('.child-wife-input');
+                const wifeFld = item.querySelector('.child-wife-field');
+                const above5El = item.querySelector('[name="child_above5"]');
+                const below5El = item.querySelector('[name="child_below5"]');
+
+                if (selectEl) {
+                    selectEl.value = child['\u0d2c\u0d28\u0d4d\u0d27\u0d02'] || '';
+                    selectEl.dispatchEvent(new Event('change'));
+                }
+                if (nameEl) nameEl.value = child['\u0d2a\u0d47\u0d30\u0d4d'] || '';
+                if (mobEl) mobEl.value = child['\u0d2e\u0d4a\u0d2c\u0d48\u0d7d \u0d28\u0d2e\u0d4d\u0d2a\u0d7c'] || '';
+                if (wifeEl) wifeEl.value = child['\u0d2d\u0d3e\u0d30\u0d4d\u0d2f\u0d2f\u0d41\u0d1f\u0d46 \u0d2a\u0d47\u0d30\u0d4d'] || '';
+                const kids = child['\u0d15\u0d41\u0d1f\u0d4d\u0d1f\u0d3f\u0d15\u0d7e'] || {};
+                if (above5El) above5El.value = kids['5 \u0d35\u0d2f\u0d38\u0d3f\u0d28\u0d41 \u0d2e\u0d41\u0d15\u0d33\u0d3f\u0d7d'] ?? 0;
+                if (below5El) below5El.value = kids['5 \u0d35\u0d2f\u0d38\u0d3f\u0d28\u0d41 \u0d24\u0d3e\u0d34\u0d46'] ?? 0;
+            });
+
+            (prefill.sisters || []).forEach(function (sister) {
+                addSister();
+                const items = document.querySelectorAll('#sistersContainer .dynamic-item');
+                const item = items[items.length - 1];
+
+                const nameEl = item.querySelector('[name="sister_name"]');
+                const mobEl = item.querySelector('[name="sister_mobile"]');
+                const above5El = item.querySelector('[name="sister_above5"]');
+                const below5El = item.querySelector('[name="sister_below5"]');
+
+                if (nameEl) nameEl.value = sister['\u0d38\u0d39\u0d4b\u0d26\u0d30\u0d3f\u0d2f\u0d41\u0d1f\u0d46 \u0d2a\u0d47\u0d30\u0d4d'] || '';
+                if (mobEl) mobEl.value = sister['\u0d2e\u0d4a\u0d2c\u0d48\u0d7d \u0d28\u0d2e\u0d4d\u0d2a\u0d7c'] || '';
+                const kids = sister['\u0d15\u0d41\u0d1f\u0d4d\u0d1f\u0d3f\u0d15\u0d7e'] || {};
+                if (above5El) above5El.value = kids['5 \u0d35\u0d2f\u0d38\u0d3f\u0d28\u0d41 \u0d2e\u0d41\u0d15\u0d33\u0d3f\u0d7d'] ?? 0;
+                if (below5El) below5El.value = kids['5 \u0d35\u0d2f\u0d38\u0d3f\u0d28\u0d41 \u0d24\u0d3e\u0d34\u0d46'] ?? 0;
+            });
+        }
     });
 
 })();

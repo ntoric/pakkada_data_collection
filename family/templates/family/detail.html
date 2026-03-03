@@ -19,9 +19,12 @@
             {{ family.created_at|date:"d M Y, g:i a" }}
         </p>
     </div>
-    <div class="d-flex gap-2 flex-wrap">
+    <div class="d-flex gap-2 flex-wrap detail-actions">
         <a href="{% url 'family:list' %}" class="btn btn-outline-secondary">
             <i class="bi bi-arrow-left me-1"></i>തിരികെ
+        </a>
+        <a href="{% url 'family:edit' family.pk %}" class="btn btn-outline-primary">
+            <i class="bi bi-pencil-square me-1"></i>എഡിറ്റ്
         </a>
         <!-- Per-record export -->
         <div class="dropdown">

@@ -81,7 +81,16 @@ class FamilyListView(LoginRequiredMixin, ListView):
     paginate_by = 20
 
     def get_queryset(self):
-        return Family.objects.all().order_by('-created_at')
+        qs = Family.objects.all().order_by('-created_at')
+        q = self.request.GET.get('q', '').strip()
+        if q:
+            qs = qs.filter(family_json__icontains=q)
+        return qs
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['search_query'] = self.request.GET.get('q', '')
+        return context
 
 
 class FamilyDetailView(LoginRequiredMixin, DetailView):
@@ -100,6 +109,82 @@ class FamilyDetailView(LoginRequiredMixin, DetailView):
         return context
 
 
+def _parse_family_form(data):
+    """Parse POST data into (family_json dict, errors list)."""
+    errors = []
+    panchayath  = data.get('panchayath', '').strip()
+    ward        = data.get('ward', '').strip()
+    form_number = data.get('form_number', '').strip()
+    head_name   = data.get('head_name', '').strip()
+    mobile      = data.get('mobile', '').strip()
+    father_name = data.get('father_name', '').strip()
+    mother_name = data.get('mother_name', '').strip()
+    wife_name   = data.get('wife_name', '').strip()
+
+    if not panchayath:  errors.append('പഞ്ചായത്ത് നൽകുക.')
+    if not ward:        errors.append('വാർഡ് നൽകുക.')
+    if not form_number: errors.append('ഫോം നമ്പർ നൽകുക.')
+    if not head_name:   errors.append('ഗൃഹനാഥന്റെ പേര് നൽകുക.')
+    if mobile and (not mobile.isdigit() or len(mobile) != 10):
+        errors.append('മൊബൈൽ നമ്പർ 10 അക്കം ആയിരിക്കണം.')
+
+    children_list = []
+    child_relations  = data.getlist('child_relation')
+    child_names      = data.getlist('child_name')
+    child_mobiles    = data.getlist('child_mobile')
+    child_wife_names = data.getlist('child_wife_name')
+    child_above5     = data.getlist('child_above5')
+    child_below5     = data.getlist('child_below5')
+    for i in range(len(child_relations)):
+        relation = child_relations[i].strip() if i < len(child_relations) else ''
+        if not relation:
+            continue
+        name         = child_names[i].strip()    if i < len(child_names)    else ''
+        child_mobile = child_mobiles[i].strip()  if i < len(child_mobiles)  else ''
+        try:  above5 = int(child_above5[i]) if i < len(child_above5) and child_above5[i] else 0
+        except (ValueError, TypeError): above5 = 0
+        try:  below5 = int(child_below5[i]) if i < len(child_below5) and child_below5[i] else 0
+        except (ValueError, TypeError): below5 = 0
+        if above5 < 0 or below5 < 0:
+            errors.append(f'കുട്ടികളുടെ എണ്ണം 0-ൽ കുറയരുത് (entry {i+1}).')
+            continue
+        entry = {'ബന്ധം': relation, 'പേര്': name, 'മൊബൈൽ നമ്പർ': child_mobile,
+                 'കുട്ടികൾ': {'5 വയസിനു മുകളിൽ': above5, '5 വയസിനു താഴെ': below5}}
+        if relation == 'മകൻ':
+            entry['ഭാര്യയുടെ പേര്'] = child_wife_names[i].strip() if i < len(child_wife_names) else ''
+        children_list.append(entry)
+
+    sisters_list = []
+    sister_names   = data.getlist('sister_name')
+    sister_mobiles = data.getlist('sister_mobile')
+    sister_above5  = data.getlist('sister_above5')
+    sister_below5  = data.getlist('sister_below5')
+    for i in range(len(sister_names)):
+        name = sister_names[i].strip() if i < len(sister_names) else ''
+        if not name:
+            continue
+        sister_mobile = sister_mobiles[i].strip() if i < len(sister_mobiles) else ''
+        try:  above5 = int(sister_above5[i]) if i < len(sister_above5) and sister_above5[i] else 0
+        except (ValueError, TypeError): above5 = 0
+        try:  below5 = int(sister_below5[i]) if i < len(sister_below5) and sister_below5[i] else 0
+        except (ValueError, TypeError): below5 = 0
+        if above5 < 0 or below5 < 0:
+            errors.append(f'സഹോദരിയുടെ കുട്ടികളുടെ എണ്ണം 0-ൽ കുറയരുത് (entry {i+1}).')
+            continue
+        sisters_list.append({'സഹോദരിയുടെ പേര്': name, 'മൊബൈൽ നമ്പർ': sister_mobile,
+                              'കുട്ടികൾ': {'5 വയസിനു മുകളിൽ': above5, '5 വയസിനു താഴെ': below5}})
+
+    family_json = {
+        'പഞ്ചായത്ത്': panchayath, 'വാർഡ്': ward, 'ഫോം നമ്പർ': form_number,
+        'ഗൃഹനാഥന്റെ പേര്': head_name, 'മൊബൈൽ നമ്പർ': mobile,
+        'ഉപ്പയുടെ പേര്': father_name, 'ഉമ്മയുടെ പേര്': mother_name,
+        'ഭാര്യയുടെ പേര്': wife_name,
+        'മക്കളുടെ വിവരം': children_list,
+        'സഹോദരിമാരുടെ വിവരങ്ങൾ': sisters_list,
+    }
+    return family_json, errors
+
+
 class FamilyCreateView(LoginRequiredMixin, View):
     """Handle GET (show form) and POST (parse + save) for family data entry."""
 
@@ -108,134 +193,62 @@ class FamilyCreateView(LoginRequiredMixin, View):
     def get(self, request):
         return render(request, self.template_name)
 
-    def post(self, request):
-        data = request.POST
-        errors = []
 
-        # ── Top-level required fields ────────────────────────────────────────
-        panchayath = data.get('panchayath', '').strip()
-        ward = data.get('ward', '').strip()
-        form_number = data.get('form_number', '').strip()
-        head_name = data.get('head_name', '').strip()
-        mobile = data.get('mobile', '').strip()
-        father_name = data.get('father_name', '').strip()
-        mother_name = data.get('mother_name', '').strip()
-        wife_name = data.get('wife_name', '').strip()
+class FamilyEditView(LoginRequiredMixin, View):
+    """Show the pre-populated edit form (GET) and save updates (POST)."""
 
-        # Validation
-        if not panchayath:
-            errors.append('പഞ്ചായത്ത് നൽകുക.')
-        if not ward:
-            errors.append('വാർഡ് നൽകുക.')
-        if not form_number:
-            errors.append('ഫോം നമ്പർ നൽകുക.')
-        if not head_name:
-            errors.append('ഗൃഹനാഥന്റെ പേര് നൽകുക.')
-        if mobile and (not mobile.isdigit() or len(mobile) != 10):
-            errors.append('മൊബൈൽ നമ്പർ 10 അക്കം ആയിരിക്കണം.')
+    template_name = 'family/form.html'
 
-        # ── Parse children (മക്കൾ) ──────────────────────────────────────────
-        children_list = []
-        child_relations = data.getlist('child_relation')
-        child_names = data.getlist('child_name')
-        child_mobiles = data.getlist('child_mobile')
-        child_wife_names = data.getlist('child_wife_name')
-        child_above5 = data.getlist('child_above5')
-        child_below5 = data.getlist('child_below5')
-
-        num_children = len(child_relations)
-        for i in range(num_children):
-            relation = child_relations[i].strip() if i < len(child_relations) else ''
-            if not relation:
-                continue
-
-            name = child_names[i].strip() if i < len(child_names) else ''
-            child_mobile = child_mobiles[i].strip() if i < len(child_mobiles) else ''
-
-            try:
-                above5 = int(child_above5[i]) if i < len(child_above5) and child_above5[i] else 0
-            except (ValueError, TypeError):
-                above5 = 0
-            try:
-                below5 = int(child_below5[i]) if i < len(child_below5) and child_below5[i] else 0
-            except (ValueError, TypeError):
-                below5 = 0
-
-            if above5 < 0 or below5 < 0:
-                errors.append(f'കുട്ടികളുടെ എണ്ണം 0-ൽ കുറയരുത് (entry {i+1}).')
-                continue
-
-            entry = {
-                'ബന്ധം': relation,
-                'പേര്': name,
-                'മൊബൈൽ നമ്പർ': child_mobile,
-                'കുട്ടികൾ': {
-                    '5 വയസിനു മുകളിൽ': above5,
-                    '5 വയസിനു താഴെ': below5,
-                },
-            }
-            # Include wife field only for 'മകൻ'
-            if relation == 'മകൻ':
-                wife = child_wife_names[i].strip() if i < len(child_wife_names) else ''
-                entry['ഭാര്യയുടെ പേര്'] = wife
-
-            children_list.append(entry)
-
-        # ── Parse sisters (സഹോദരിമാർ) ──────────────────────────────────────
-        sisters_list = []
-        sister_names = data.getlist('sister_name')
-        sister_mobiles = data.getlist('sister_mobile')
-        sister_above5 = data.getlist('sister_above5')
-        sister_below5 = data.getlist('sister_below5')
-
-        num_sisters = len(sister_names)
-        for i in range(num_sisters):
-            name = sister_names[i].strip() if i < len(sister_names) else ''
-            if not name:
-                continue
-
-            sister_mobile = sister_mobiles[i].strip() if i < len(sister_mobiles) else ''
-
-            try:
-                above5 = int(sister_above5[i]) if i < len(sister_above5) and sister_above5[i] else 0
-            except (ValueError, TypeError):
-                above5 = 0
-            try:
-                below5 = int(sister_below5[i]) if i < len(sister_below5) and sister_below5[i] else 0
-            except (ValueError, TypeError):
-                below5 = 0
-
-            if above5 < 0 or below5 < 0:
-                errors.append(f'സഹോദരിയുടെ കുട്ടികളുടെ എണ്ണം 0-ൽ കുറയരുത് (entry {i+1}).')
-                continue
-
-            sisters_list.append({
-                'സഹോദരിയുടെ പേര്': name,
-                'മൊബൈൽ നമ്പർ': sister_mobile,
-                'കുട്ടികൾ': {
-                    '5 വയസിനു മുകളിൽ': above5,
-                    '5 വയസിനു താഴെ': below5,
-                },
-            })
-
-        if errors:
-            return render(request, self.template_name, {'errors': errors, 'post': data})
-
-        # ── Construct exact JSON structure ────────────────────────────────────
-        family_json = {
-            'പഞ്ചായത്ത്': panchayath,
-            'വാർഡ്': ward,
-            'ഫോം നമ്പർ': form_number,
-            'ഗൃഹനാഥന്റെ പേര്': head_name,
-            'മൊബൈൽ നമ്പർ': mobile,
-            'ഉപ്പയുടെ പേര്': father_name,
-            'ഉമ്മയുടെ പേര്': mother_name,
-            'ഭാര്യയുടെ പേര്': wife_name,
-            'മക്കളുടെ വിവരം': children_list,
-            'സഹോദരിമാരുടെ വിവരങ്ങൾ': sisters_list,
+    def get(self, request, pk):
+        family = get_object_or_404(Family, pk=pk)
+        d = family.family_json
+        # Build a POST-compatible dict so template's {{ post.field }} works
+        initial = {
+            'panchayath':   d.get('പഞ്ചായത്ത്', ''),
+            'ward':         d.get('വാർഡ്', ''),
+            'form_number':  d.get('ഫോം നമ്പർ', ''),
+            'head_name':    d.get('ഗൃഹനാഥന്റെ പേര്', ''),
+            'mobile':       d.get('മൊബൈൽ നമ്പർ', ''),
+            'father_name':  d.get('ഉപ്പയുടെ പേര്', ''),
+            'mother_name':  d.get('ഉമ്മയുടെ പേര്', ''),
+            'wife_name':    d.get('ഭാര്യയുടെ പേര്', ''),
         }
+        return render(request, self.template_name, {
+            'post':         initial,
+            'edit_pk':      pk,
+            'prefill_json': json.dumps({
+                'children': d.get('മക്കളുടെ വിവരം', []),
+                'sisters':  d.get('സഹോദരിമാരുടെ വിവരങ്ങൾ', []),
+            }, ensure_ascii=False),
+        })
 
-        family = Family.objects.create(family_json=family_json)
+    def post(self, request, pk):
+        """Reuse the same parse logic; update the existing record."""
+        family = get_object_or_404(Family, pk=pk)
+        # Delegate parsing to a shared helper (defined below)
+        family_json, errors = _parse_family_form(request.POST)
+        if errors:
+            d = family.family_json
+            initial = {
+                'panchayath':  request.POST.get('panchayath', d.get('പഞ്ചായത്ത്', '')),
+                'ward':        request.POST.get('ward',        d.get('വാർഡ്', '')),
+                'form_number': request.POST.get('form_number', d.get('ഫോം നമ്പർ', '')),
+                'head_name':   request.POST.get('head_name',   d.get('ഗൃഹനാഥന്റെ പേര്', '')),
+                'mobile':      request.POST.get('mobile',      d.get('മൊബൈൽ നമ്പർ', '')),
+                'father_name': request.POST.get('father_name', d.get('ഉപ്പയുടെ പേര്', '')),
+                'mother_name': request.POST.get('mother_name', d.get('ഉമ്മയുടെ പേര്', '')),
+                'wife_name':   request.POST.get('wife_name',   d.get('ഭാര്യയുടെ പേര്', '')),
+            }
+            return render(request, self.template_name, {
+                'errors': errors, 'post': initial, 'edit_pk': pk,
+                'prefill_json': json.dumps({
+                    'children': d.get('മക്കളുടെ വിവരം', []),
+                    'sisters':  d.get('സഹോദരിമാരുടെ വിവരങ്ങൾ', []),
+                }, ensure_ascii=False),
+            })
+        family.family_json = family_json
+        family.save()
+        messages.success(request, 'ഫോം ഡാറ്റ അപ്ഡേറ്റ് ചെയ്തു.')
         return redirect('family:detail', pk=family.pk)
 
 

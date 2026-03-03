@@ -20,4 +20,7 @@ urlpatterns = [
 
     # Delete
     path('<int:pk>/delete/', views.FamilyDeleteView.as_view(), name='delete'),
+
+    # Edit
+    path('<int:pk>/edit/', views.FamilyEditView.as_view(), name='edit'),
 ]

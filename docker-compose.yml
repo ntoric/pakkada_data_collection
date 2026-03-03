@@ -1,0 +1,16 @@
+services:
+  web:
+    build: .
+    container_name: pakkada_web
+    restart: unless-stopped
+    ports:
+      - "8006:8000"
+    volumes:
+      # Persist the SQLite database and uploaded fonts across container restarts
+      - ./db.sqlite3:/app/db.sqlite3
+    environment:
+      - DJANGO_SETTINGS_MODULE=pakkada.settings
+      - SECRET_KEY=${SECRET_KEY:-django-insecure-change-me-in-production}
+      - DEBUG=${DEBUG:-False}
+      - ALLOWED_HOSTS=${ALLOWED_HOSTS:-*}
+

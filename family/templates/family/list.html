@@ -2,42 +2,131 @@
 {% load family_filters %}
 
 {% block title %}എല്ലാ രേഖകൾ - പാക്കട{% endblock %}
+{% block container_class %}container-fluid px-4{% endblock %}
+{% block main_class %}container-fluid px-4{% endblock %}
 
 {% block content %}
-<div class="d-flex align-items-center justify-content-between mb-4">
-    <div>
-        <h1 class="page-heading"><i class="bi bi-table me-2"></i>കുടുംബ ഡേറ്റ - എല്ലാ രേഖകൾ</h1>
-        <p class="page-subheading">
-            മൊത്തം {{ page_obj.paginator.count }} രേഖകൾ
-        </p>
-    </div>
-    <div class="d-flex gap-2 flex-wrap">
-        <!-- Bulk export -->
-        <div class="dropdown">
-            <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                <i class="bi bi-download me-1"></i>Export All
-            </button>
-            <ul class="dropdown-menu dropdown-menu-end">
-                <li>
-                    <a class="dropdown-item" href="{% url 'family:export_all_json' %}">
-                        <i class="bi bi-filetype-json me-2 text-warning"></i>JSON ആയി Export ചെയ്യുക
-                    </a>
-                </li>
-                <li>
-                    <a class="dropdown-item" href="{% url 'family:export_all_csv' %}">
-                        <i class="bi bi-filetype-csv me-2 text-success"></i>CSV ആയി Export ചെയ്യുക
-                    </a>
-                </li>
-            </ul>
+<div class="mb-4">
+    <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-md-between gap-3 mb-3">
+        <div>
+            <h1 class="page-heading"><i class="bi bi-table me-2"></i>കുടുംബ ഡേറ്റ - എല്ലാ രേഖകൾ</h1>
+            <p class="page-subheading mb-0">
+                മൊത്തം {{ page_obj.paginator.count }} രേഖകൾ
+            </p>
         </div>
-        <a href="{% url 'family:create' %}" class="btn btn-primary">
-            <i class="bi bi-plus-circle me-1"></i>പുതിയ ഫോം
-        </a>
+        <div class="d-flex gap-2 flex-wrap">
+            <!-- Bulk export -->
+            <div class="dropdown">
+                <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                    <i class="bi bi-download me-1"></i>Export All
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end">
+                    <li>
+                        <a class="dropdown-item" href="{% url 'family:export_all_json' %}">
+                            <i class="bi bi-filetype-json me-2 text-warning"></i>JSON ആയി Export ചെയ്യുക
+                        </a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item" href="{% url 'family:export_all_csv' %}">
+                            <i class="bi bi-filetype-csv me-2 text-success"></i>CSV ആയി Export ചെയ്യുക
+                        </a>
+                    </li>
+                </ul>
+            </div>
+            <a href="{% url 'family:create' %}" class="btn btn-primary">
+                <i class="bi bi-plus-circle me-1"></i>പുതിയ ഫോം
+            </a>
+        </div>
     </div>
 
+    <!-- Search bar -->
+    <form method="get" class="mb-0">
+    <div class="input-group">
+        <span class="input-group-text bg-white border-end-0">
+            <i class="bi bi-search text-muted"></i>
+        </span>
+        <input type="search" name="q" class="form-control border-start-0 ps-0"
+               placeholder="ഫോം നം, വാർഡ്, പേര്, മൊബൈൽ...  തിരയുക"
+               value="{{ search_query }}" autocomplete="off">
+        <button class="btn btn-primary" type="submit">തിരയുക</button>
+        {% if search_query %}
+        <a href="{% url 'family:list' %}" class="btn btn-outline-secondary">
+            <i class="bi bi-x-lg"></i>
+        </a>
+        {% endif %}
+    </div>
+    {% if search_query %}
+    <p class="mt-2 text-muted small">
+        <i class="bi bi-funnel me-1"></i>
+        "{{ search_query }}" — {{ page_obj.paginator.count }} ഫലം
+    </p>
+    {% endif %}
+    </form>
+</div>
 
 {% if families %}
-<div class="card">
+
+<!-- ── Mobile card list (visible only on small screens) ── -->
+<div class="d-md-none mb-3">
+    {% for family in families %}
+    <div class="family-mobile-card">
+        <div class="d-flex justify-content-between align-items-start">
+            <div>
+                <div class="fw-bold">{{ family.family_json|get_value:"ഗൃഹനാഥന്റെ പേര്" }}</div>
+                <div class="text-muted small mt-1">
+                    <span class="badge bg-secondary me-1">ഫോം {{ family.family_json|get_value:"ഫോം നമ്പർ" }}</span>
+                    <span class="badge bg-success me-1">വാർഡ് {{ family.family_json|get_value:"വാർഡ്" }}</span>
+                    {{ family.family_json|get_value:"പഞ്ചായത്ത്" }}
+                </div>
+                <div class="text-muted" style="font-size:0.76rem; margin-top:4px;">
+                    {{ family.created_at|date:"d M Y, g:i a" }}
+                </div>
+            </div>
+        </div>
+        <div class="actions">
+            <a href="{% url 'family:detail' family.pk %}"
+               class="btn btn-outline-primary btn-sm">
+                <i class="bi bi-eye me-1"></i>കാണുക
+            </a>
+            <a href="{% url 'family:edit' family.pk %}"
+               class="btn btn-outline-secondary btn-sm">
+                <i class="bi bi-pencil-square me-1"></i>എഡിറ്റ്
+            </a>
+            <button type="button" class="btn btn-outline-danger btn-sm"
+                    data-bs-toggle="modal" data-bs-target="#delModal{{ family.pk }}">
+                <i class="bi bi-trash3 me-1"></i>ഡിലീറ്റ്
+            </button>
+        </div>
+
+        <!-- Confirm delete modal -->
+        <div class="modal fade" id="delModal{{ family.pk }}" tabindex="-1">
+            <div class="modal-dialog modal-dialog-centered modal-sm">
+                <div class="modal-content">
+                    <div class="modal-header border-0 pb-0">
+                        <h6 class="modal-title text-danger">
+                            <i class="bi bi-exclamation-triangle-fill me-1"></i>ഡിലീറ്റ് ചെയ്യണോ?
+                        </h6>
+                        <button type="button" class="btn-close btn-close-sm" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body py-2 small">
+                        <strong>{{ family.family_json|get_value:"ഗൃഹനാഥന്റെ പേര്" }}</strong> — ഈ രേഖ ഡിലീറ്റ് ചെയ്യും.
+                    </div>
+                    <div class="modal-footer border-0 pt-0 gap-2">
+                        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">റദ്ദാക്കുക</button>
+                        <form method="post" action="{% url 'family:delete' family.pk %}" class="d-inline">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-danger btn-sm">ഡിലീറ്റ്</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- ── Desktop table (hidden on mobile) ── -->
+<div class="card d-none d-md-block">
     <div class="card-body p-0">
         <div class="table-responsive">
             <table class="table table-hover mb-0 align-middle">
@@ -74,6 +163,10 @@
                                 <a href="{% url 'family:detail' family.pk %}"
                                    class="btn btn-outline-primary btn-sm" title="കാണുക">
                                     <i class="bi bi-eye"></i>
+                                </a>
+                                <a href="{% url 'family:edit' family.pk %}"
+                                   class="btn btn-outline-secondary btn-sm" title="എഡിറ്റ്">
+                                    <i class="bi bi-pencil-square"></i>
                                 </a>
                                 <a href="{% url 'family:export_json' family.pk %}"
                                    class="btn btn-outline-warning btn-sm" title="JSON Export">

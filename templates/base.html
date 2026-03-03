@@ -167,6 +167,62 @@
             font-size: 0.82rem;
             color: #9ca3af;
         }
+
+        /* ══ Mobile / Responsive ══════════════════════════════════════════ */
+        /* Touch-friendly tap targets */
+        .btn { min-height: 44px; }
+        .btn-sm { min-height: 36px; }
+        .nav-link { min-height: 44px; display: flex; align-items: center; }
+
+        @media (max-width: 767.98px) {
+            /* Headings */
+            .page-heading { font-size: 1.2rem; }
+            .page-subheading { font-size: 0.82rem; }
+
+            /* Navbar brand tighter */
+            .navbar-brand { font-size: 1rem; }
+
+            /* Reduce inner padding on cards */
+            .card-body { padding: 0.75rem; }
+
+            /* Action button groups — wrap */
+            .d-flex.gap-1 { flex-wrap: wrap; }
+            .d-flex.gap-2 { flex-wrap: wrap; }
+
+            /* Search bar full-width */
+            .input-group { flex-wrap: nowrap; }
+            .input-group .form-control { min-width: 0; }
+
+            /* Table font */
+            .table { font-size: 0.82rem; }
+
+            /* Mobile card list items */
+            .mobile-card {
+                border-bottom: 1px solid #dee2e6;
+                padding: 0.75rem 0;
+            }
+            .mobile-card:last-child { border-bottom: none; }
+
+            /* Container fluid full edge-to-edge on very small */
+            .container-fluid { padding-left: 0.75rem !important; padding-right: 0.75rem !important; }
+
+            /* Detail section cards */
+            .section-card .card-header { font-size: 0.9rem; }
+
+            /* Stack detail buttons vertically */
+            .detail-actions { flex-direction: column; gap: 0.5rem; }
+            .detail-actions .btn { width: 100%; justify-content: center; }
+        }
+
+        /* Mobile-list card style */
+        .family-mobile-card {
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 1px 6px rgba(0,0,0,0.07);
+            padding: 0.85rem 1rem;
+            margin-bottom: 0.6rem;
+        }
+        .family-mobile-card .actions { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 0.6rem; }
     </style>
     {% block extra_head %}{% endblock %}
 </head>
@@ -219,7 +275,7 @@
     </nav>
 
     <!-- Messages -->
-    <div class="container">
+    <div class="{% block container_class %}container{% endblock %}">
         {% if messages %}
             {% for message in messages %}
                 <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
@@ -231,7 +287,7 @@
     </div>
 
     <!-- Main content -->
-    <main class="container pb-5">
+    <main class="{% block main_class %}container{% endblock %} pb-5">
         {% block content %}{% endblock %}
     </main>
 

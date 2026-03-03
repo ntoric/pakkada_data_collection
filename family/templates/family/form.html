@@ -1,11 +1,14 @@
 {% extends "base.html" %}
 
-{% block title %}ഡേറ്റ എൻട്രി ഫോം - പാക്കട{% endblock %}
+{% block title %}{% if edit_pk %}എഡിറ്റ് ഫോം{% else %}ഡേറ്റ എൻട്രി ഫോം{% endif %} - പാക്കട{% endblock %}
 
 {% block content %}
 <div class="row mb-3">
     <div class="col">
-        <h1 class="page-heading"><i class="bi bi-file-earmark-person me-2"></i>കുടുംബ ഡേറ്റ എൻട്രി ഫോം</h1>
+        <h1 class="page-heading">
+            <i class="bi bi-{% if edit_pk %}pencil-square{% else %}file-earmark-person{% endif %} me-2"></i>
+            {% if edit_pk %}കുടുംബ ഡേറ്റ എഡിറ്റ് ചെയ്യുക{% else %}കുടുംബ ഡേറ്റ എൻട്രി ഫോം{% endif %}
+        </h1>
         <p class="page-subheading">താഴെ നൽകിയ ഫോം പൂർണ്ണമായി പൂരിപ്പിക്കുക</p>
     </div>
 </div>
@@ -21,7 +24,13 @@
 </div>
 {% endif %}
 
-<form id="familyForm" method="post" action="{% url 'family:create' %}" novalidate>
+{% if prefill_json %}
+<script id="prefillData" type="application/json">{{ prefill_json }}</script>
+{% endif %}
+
+<form id="familyForm" method="post"
+      action="{% if edit_pk %}{% url 'family:edit' edit_pk %}{% else %}{% url 'family:create' %}{% endif %}"
+      novalidate>
     {% csrf_token %}
 
     <!-- ════════════════════════════════════════════════
