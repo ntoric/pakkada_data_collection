@@ -1,0 +1,287 @@
+{% extends "base.html" %}
+{% load family_filters %}
+
+{% block title %}{{ family.family_json|get_value:"ഗൃഹനാഥന്റെ പേര്" }} - പാക്കട{% endblock %}
+
+{% block content %}
+
+{% with data=family.family_json %}
+
+<!-- Page header -->
+<div class="d-flex align-items-start justify-content-between mb-4 flex-wrap gap-2">
+    <div>
+        <h1 class="page-heading">
+            <i class="bi bi-card-text me-2"></i>{{ data|get_value:"ഗൃഹനാഥന്റെ പേര്" }}
+        </h1>
+        <p class="page-subheading">
+            {% if data|get_value:"ഫോം നമ്പർ" %}ഫോം #{{ data|get_value:"ഫോം നമ്പർ" }} &bull;{% endif %}
+            {% if data|get_value:"പഞ്ചായത്ത്" %}{{ data|get_value:"പഞ്ചായത്ത്" }} &bull;{% endif %}
+            {{ family.created_at|date:"d M Y, g:i a" }}
+        </p>
+    </div>
+    <div class="d-flex gap-2 flex-wrap">
+        <a href="{% url 'family:list' %}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-1"></i>തിരികെ
+        </a>
+        <!-- Per-record export -->
+        <div class="dropdown">
+            <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                <i class="bi bi-download me-1"></i>Export
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end">
+                <li>
+                    <a class="dropdown-item" href="{% url 'family:export_json' family.pk %}">
+                        <i class="bi bi-filetype-json me-2 text-warning"></i>JSON ആയി Export ചെയ്യുക
+                    </a>
+                </li>
+                <li>
+                    <a class="dropdown-item" href="{% url 'family:export_csv' family.pk %}">
+                        <i class="bi bi-filetype-csv me-2 text-success"></i>CSV ആയി Export ചെയ്യുക
+                    </a>
+                </li>
+                <li><hr class="dropdown-divider"></li>
+                <li>
+                    <a class="dropdown-item" href="{% url 'family:export_poster' family.pk %}">
+                        <i class="bi bi-image me-2 text-info"></i>Poster JPG ഡൗൺലോഡ്
+                    </a>
+                </li>
+            </ul>
+        </div>
+        <a href="{% url 'family:create' %}" class="btn btn-primary">
+            <i class="bi bi-plus-circle me-1"></i>പുതിയ ഫോം
+        </a>
+        <!-- Delete trigger -->
+        <button type="button" class="btn btn-danger"
+                data-bs-toggle="modal" data-bs-target="#deleteModal">
+            <i class="bi bi-trash3 me-1"></i>ഡിലീറ്റ്
+        </button>
+    </div>
+</div>
+
+<!-- Delete confirmation modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header border-0">
+                <h5 class="modal-title text-danger">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>ഫോം ഡിലീറ്റ് ചെയ്യണോ?
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p class="mb-1">
+                    <strong>{{ family.family_json|get_value:"ഗൃഹനാഥന്റെ പേര്" }}</strong>
+                    — ഈ രേഖ സ്ഥിരമായി ഡിലീറ്റ് ചെയ്യും.
+                </p>
+                <p class="text-muted small mb-0">ഈ നടപടി പഴയപടിയാക്കാൻ കഴിയില്ല.</p>
+            </div>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="bi bi-x-circle me-1"></i>റദ്ദാക്കുക
+                </button>
+                <form method="post" action="{% url 'family:delete' family.pk %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">
+                        <i class="bi bi-trash3 me-1"></i>അതെ, ഡിലീറ്റ് ചെയ്യുക
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- ══════════════════════════════════════
+     SECTION 1: Basic Info
+══════════════════════════════════════ -->
+<div class="card section-card mb-4">
+    <div class="card-header">
+        <i class="bi bi-house-heart me-2"></i>അടിസ്ഥാന വിവരങ്ങൾ
+    </div>
+    <div class="card-body">
+        <div class="row g-3">
+
+            {% if data|get_value:"പഞ്ചായത്ത്" %}
+            <div class="col-sm-6 col-md-4">
+                <div class="detail-label">പഞ്ചായത്ത്</div>
+                <div class="detail-value">{{ data|get_value:"പഞ്ചായത്ത്" }}</div>
+            </div>
+            {% endif %}
+
+            {% if data|get_value:"വാർഡ്" %}
+            <div class="col-sm-6 col-md-4">
+                <div class="detail-label">വാർഡ്</div>
+                <div class="detail-value">{{ data|get_value:"വാർഡ്" }}</div>
+            </div>
+            {% endif %}
+
+            {% if data|get_value:"ഫോം നമ്പർ" %}
+            <div class="col-sm-6 col-md-4">
+                <div class="detail-label">ഫോം നമ്പർ</div>
+                <div class="detail-value">{{ data|get_value:"ഫോം നമ്പർ" }}</div>
+            </div>
+            {% endif %}
+
+            {% if data|get_value:"ഗൃഹനാഥന്റെ പേര്" %}
+            <div class="col-sm-6 col-md-4">
+                <div class="detail-label">ഗൃഹനാഥന്റെ പേര്</div>
+                <div class="detail-value fw-semibold">{{ data|get_value:"ഗൃഹനാഥന്റെ പേര്" }}</div>
+            </div>
+            {% endif %}
+
+            {% if data|get_value:"മൊബൈൽ നമ്പർ" %}
+            <div class="col-sm-6 col-md-4">
+                <div class="detail-label">മൊബൈൽ നമ്പർ</div>
+                <div class="detail-value">
+                    <a href="tel:{{ data|get_value:'മൊബൈൽ നമ്പർ' }}" class="text-decoration-none">
+                        <i class="bi bi-telephone me-1 text-success"></i>{{ data|get_value:"മൊബൈൽ നമ്പർ" }}
+                    </a>
+                </div>
+            </div>
+            {% endif %}
+
+            {% if data|get_value:"ഉപ്പയുടെ പേര്" %}
+            <div class="col-sm-6 col-md-4">
+                <div class="detail-label">ഉപ്പയുടെ പേര്</div>
+                <div class="detail-value">{{ data|get_value:"ഉപ്പയുടെ പേര്" }}</div>
+            </div>
+            {% endif %}
+
+            {% if data|get_value:"ഉമ്മയുടെ പേര്" %}
+            <div class="col-sm-6 col-md-4">
+                <div class="detail-label">ഉമ്മയുടെ പേര്</div>
+                <div class="detail-value">{{ data|get_value:"ഉമ്മയുടെ പേര്" }}</div>
+            </div>
+            {% endif %}
+
+            {% if data|get_value:"ഭാര്യയുടെ പേര്" %}
+            <div class="col-sm-6 col-md-4">
+                <div class="detail-label">ഭാര്യയുടെ പേര്</div>
+                <div class="detail-value">{{ data|get_value:"ഭാര്യയുടെ പേര്" }}</div>
+            </div>
+            {% endif %}
+
+        </div>
+    </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     SECTION 2: മക്കൾ
+══════════════════════════════════════ -->
+{% with children=data|get_value:"മക്കളുടെ വിവരം" %}
+{% if children %}
+<div class="card section-card mb-4">
+    <div class="card-header">
+        <i class="bi bi-people me-2"></i>മക്കളുടെ വിവരം
+        <span class="badge bg-white text-success ms-2">{{ children|length }}</span>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0 align-middle">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>ബന്ധം</th>
+                        <th>പേര്</th>
+                        <th>മൊബൈൽ</th>
+                        <th>ഭാര്യ</th>
+                        <th>കുട്ടികൾ (5 വയസിനു മുകളിൽ)</th>
+                        <th>കുട്ടികൾ (5 വയസിനു താഴെ)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for child in children %}
+                    <tr>
+                        <td class="text-muted small">{{ forloop.counter }}</td>
+                        <td>
+                            {% if child|get_value:"ബന്ധം" == "മകൻ" %}
+                            <span class="badge bg-primary">{{ child|get_value:"ബന്ധം" }}</span>
+                            {% else %}
+                            <span class="badge bg-info">{{ child|get_value:"ബന്ധം" }}</span>
+                            {% endif %}
+                        </td>
+                        <td class="fw-semibold">{{ child|get_value:"പേര്"|default:"—" }}</td>
+                        <td>
+                            {% if child|get_value:"മൊബൈൽ നമ്പർ" %}
+                            <a href="tel:{{ child|get_value:"മൊബൈൽ നമ്പർ" }}" class="text-decoration-none">
+                                <i class="bi bi-telephone me-1 text-success"></i>{{ child|get_value:"മൊബൈൽ നമ്പർ" }}
+                            </a>
+                            {% else %}—{% endif %}
+                        </td>
+                        <td>
+                            {% if child|get_value:"ഭാര്യയുടെ പേര്" %}
+                            {{ child|get_value:"ഭാര്യയുടെ പേര്" }}
+                            {% else %}—{% endif %}
+                        </td>
+                        {% with kids=child|get_value:"കുട്ടികൾ" %}
+                        <td>
+                            {% if kids %}{{ kids|get_value:"5 വയസിനു മുകളിൽ"|default:"0" }}{% else %}0{% endif %}
+                        </td>
+                        <td>
+                            {% if kids %}{{ kids|get_value:"5 വയസിനു താഴെ"|default:"0" }}{% else %}0{% endif %}
+                        </td>
+                        {% endwith %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endwith %}
+
+<!-- ══════════════════════════════════════
+     SECTION 3: സഹോദരിമാർ
+══════════════════════════════════════ -->
+{% with sisters=data|get_value:"സഹോദരിമാരുടെ വിവരങ്ങൾ" %}
+{% if sisters %}
+<div class="card section-card mb-4">
+    <div class="card-header">
+        <i class="bi bi-person-hearts me-2"></i>സഹോദരിമാരുടെ വിവരങ്ങൾ
+        <span class="badge bg-white text-success ms-2">{{ sisters|length }}</span>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0 align-middle">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>സഹോദരിയുടെ പേര്</th>
+                        <th>മൊബൈൽ</th>
+                        <th>കുട്ടികൾ (5 വയസിനു മുകളിൽ)</th>
+                        <th>കുട്ടികൾ (5 വയസിനു താഴെ)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for sister in sisters %}
+                    <tr>
+                        <td class="text-muted small">{{ forloop.counter }}</td>
+                        <td class="fw-semibold">{{ sister|get_value:"സഹോദരിയുടെ പേര്"|default:"—" }}</td>
+                        <td>
+                            {% if sister|get_value:"മൊബൈൽ നമ്പർ" %}
+                            <a href="tel:{{ sister|get_value:"മൊബൈൽ നമ്പർ" }}" class="text-decoration-none">
+                                <i class="bi bi-telephone me-1 text-success"></i>{{ sister|get_value:"മൊബൈൽ നമ്പർ" }}
+                            </a>
+                            {% else %}—{% endif %}
+                        </td>
+                        {% with kids=sister|get_value:"കുട്ടികൾ" %}
+                        <td>
+                            {% if kids %}{{ kids|get_value:"5 വയസിനു മുകളിൽ"|default:"0" }}{% else %}0{% endif %}
+                        </td>
+                        <td>
+                            {% if kids %}{{ kids|get_value:"5 വയസിനു താഴെ"|default:"0" }}{% else %}0{% endif %}
+                        </td>
+                        {% endwith %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endwith %}
+
+{% endwith %}
+{% endblock %}

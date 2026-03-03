@@ -1,0 +1,173 @@
+{% extends "base.html" %}
+
+{% block title %}ഡേറ്റ എൻട്രി ഫോം - പാക്കട{% endblock %}
+
+{% block content %}
+<div class="row mb-3">
+    <div class="col">
+        <h1 class="page-heading"><i class="bi bi-file-earmark-person me-2"></i>കുടുംബ ഡേറ്റ എൻട്രി ഫോം</h1>
+        <p class="page-subheading">താഴെ നൽകിയ ഫോം പൂർണ്ണമായി പൂരിപ്പിക്കുക</p>
+    </div>
+</div>
+
+{% if errors %}
+<div class="alert alert-danger">
+    <strong><i class="bi bi-exclamation-triangle-fill me-1"></i>രേഖകളിൽ പിഴവ്:</strong>
+    <ul class="mb-0 mt-1">
+        {% for error in errors %}
+            <li>{{ error }}</li>
+        {% endfor %}
+    </ul>
+</div>
+{% endif %}
+
+<form id="familyForm" method="post" action="{% url 'family:create' %}" novalidate>
+    {% csrf_token %}
+
+    <!-- ════════════════════════════════════════════════
+         SECTION 1: Basic Family Information
+    ════════════════════════════════════════════════ -->
+    <div class="card section-card mb-4">
+        <div class="card-header d-flex align-items-center">
+            <i class="bi bi-house-heart me-2"></i>അടിസ്ഥാന വിവരങ്ങൾ
+        </div>
+        <div class="card-body">
+            <div class="row g-3">
+
+                <!-- പഞ്ചായത്ത് -->
+                <div class="col-md-4">
+                    <label class="form-label" for="id_panchayath">
+                        പഞ്ചായത്ത് <span class="required-star">*</span>
+                    </label>
+                    <input type="text" class="form-control" id="id_panchayath"
+                           name="panchayath" placeholder="പഞ്ചായത്ത് നൽകുക"
+                           value="{{ post.panchayath|default:'' }}" required>
+                </div>
+
+                <!-- വാർഡ് -->
+                <div class="col-md-4">
+                    <label class="form-label" for="id_ward">
+                        വാർഡ് <span class="required-star">*</span>
+                    </label>
+                    <input type="text" class="form-control" id="id_ward"
+                           name="ward" placeholder="വാർഡ് നൽകുക"
+                           value="{{ post.ward|default:'' }}" required>
+                </div>
+
+                <!-- ഫോം നമ്പർ -->
+                <div class="col-md-4">
+                    <label class="form-label" for="id_form_number">
+                        ഫോം നമ്പർ <span class="required-star">*</span>
+                    </label>
+                    <input type="text" class="form-control" id="id_form_number"
+                           name="form_number" placeholder="ഫോം നമ്പർ"
+                           value="{{ post.form_number|default:'' }}" required>
+                </div>
+
+                <!-- ഗൃഹനാഥന്റെ പേര് -->
+                <div class="col-md-6">
+                    <label class="form-label" for="id_head_name">
+                        ഗൃഹനാഥന്റെ പേര് <span class="required-star">*</span>
+                    </label>
+                    <input type="text" class="form-control" id="id_head_name"
+                           name="head_name" placeholder="ഗൃഹനാഥന്റെ പൂർണ്ണ പേര്"
+                           value="{{ post.head_name|default:'' }}" required>
+                </div>
+
+                <!-- മൊബൈൽ നമ്പർ -->
+                <div class="col-md-6">
+                    <label class="form-label" for="id_mobile">
+                        മൊബൈൽ നമ്പർ
+                    </label>
+                    <input type="tel" class="form-control" id="id_mobile"
+                           name="mobile" placeholder="10-അക്ക നമ്പർ"
+                           maxlength="10" inputmode="numeric"
+                           value="{{ post.mobile|default:'' }}">
+                </div>
+
+                <!-- ഉപ്പയുടെ പേര് -->
+                <div class="col-md-4">
+                    <label class="form-label" for="id_father_name">ഉപ്പയുടെ പേര്</label>
+                    <input type="text" class="form-control" id="id_father_name"
+                           name="father_name" placeholder="ഉപ്പ"
+                           value="{{ post.father_name|default:'' }}">
+                </div>
+
+                <!-- ഉമ്മയുടെ പേര് -->
+                <div class="col-md-4">
+                    <label class="form-label" for="id_mother_name">ഉമ്മയുടെ പേര്</label>
+                    <input type="text" class="form-control" id="id_mother_name"
+                           name="mother_name" placeholder="ഉമ്മ"
+                           value="{{ post.mother_name|default:'' }}">
+                </div>
+
+                <!-- ഭാര്യയുടെ പേര് -->
+                <div class="col-md-4">
+                    <label class="form-label" for="id_wife_name">ഭാര്യയുടെ പേര്</label>
+                    <input type="text" class="form-control" id="id_wife_name"
+                           name="wife_name" placeholder="ഭാര്യ"
+                           value="{{ post.wife_name|default:'' }}">
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- ════════════════════════════════════════════════
+         SECTION 2: മക്കളുടെ വിവരം (Dynamic)
+    ════════════════════════════════════════════════ -->
+    <div class="card section-card mb-4">
+        <div class="card-header d-flex align-items-center justify-content-between">
+            <span><i class="bi bi-people me-2"></i>മക്കളുടെ വിവരം</span>
+            <button type="button" class="btn btn-light btn-sm" id="addChildBtn">
+                <i class="bi bi-plus-circle me-1"></i>Add Member
+            </button>
+        </div>
+        <div class="card-body">
+            <div id="childrenContainer">
+                <!-- Dynamic child entries injected here by JS -->
+            </div>
+            <p class="text-muted small mb-0" id="childEmptyMsg">
+                <i class="bi bi-info-circle me-1"></i>
+                "Add Member" ക്ലിക്ക് ചെയ്ത് മക്കളെ ചേർക്കുക.
+            </p>
+        </div>
+    </div>
+
+    <!-- ════════════════════════════════════════════════
+         SECTION 3: സഹോദരിമാർ (Dynamic)
+    ════════════════════════════════════════════════ -->
+    <div class="card section-card mb-4">
+        <div class="card-header d-flex align-items-center justify-content-between">
+            <span><i class="bi bi-person-hearts me-2"></i>സഹോദരിമാരുടെ വിവരങ്ങൾ</span>
+            <button type="button" class="btn btn-light btn-sm" id="addSisterBtn">
+                <i class="bi bi-plus-circle me-1"></i>Add Sister
+            </button>
+        </div>
+        <div class="card-body">
+            <div id="sistersContainer">
+                <!-- Dynamic sister entries injected here by JS -->
+            </div>
+            <p class="text-muted small mb-0" id="sisterEmptyMsg">
+                <i class="bi bi-info-circle me-1"></i>
+                "Add Sister" ക്ലിക്ക് ചെയ്ത് സഹോദരിമാരെ ചേർക്കുക.
+            </p>
+        </div>
+    </div>
+
+    <!-- Submit -->
+    <div class="d-flex gap-3 justify-content-end mb-4">
+        <a href="{% url 'family:list' %}" class="btn btn-outline-secondary px-4">
+            <i class="bi bi-x-lg me-1"></i>റദ്ദ് ചെയ്യുക
+        </a>
+        <button type="submit" class="btn btn-primary px-5" id="submitBtn">
+            <i class="bi bi-save me-1"></i>സേവ് ചെയ്യുക
+        </button>
+    </div>
+
+</form>
+{% endblock %}
+
+{% block extra_js %}
+<script src="/static/js/form_dynamic.js"></script>
+{% endblock %}

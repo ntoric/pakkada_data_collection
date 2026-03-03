@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="ml">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}പാക്കട ഡേറ്റ കളക്ഷൻ{% endblock %}</title>
+    <meta name="description" content="Family data collection form for Pakkada local area.">
+    <!-- Bootstrap 5 CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <!-- Google Fonts: Noto Sans Malayalam -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Malayalam:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #1d6f42;
+            --primary-light: #28a745;
+            --primary-dark: #155230;
+            --accent: #f0a500;
+            --surface: #f8f9fa;
+            --card-shadow: 0 2px 12px rgba(0,0,0,0.08);
+        }
+
+        body {
+            font-family: 'Noto Sans Malayalam', 'Inter', sans-serif;
+            background-color: #f0f4f8;
+            color: #212529;
+        }
+
+        /* ── Navbar ── */
+        .navbar {
+            background: linear-gradient(135deg, var(--primary-dark), var(--primary));
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        }
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.2rem;
+            letter-spacing: 0.02em;
+        }
+        .navbar-brand span {
+            color: var(--accent);
+        }
+
+        /* ── Cards ── */
+        .card {
+            border: none;
+            border-radius: 12px;
+            box-shadow: var(--card-shadow);
+        }
+        .card-header {
+            border-radius: 12px 12px 0 0 !important;
+            font-weight: 600;
+            font-size: 1rem;
+        }
+        .section-card .card-header {
+            background: linear-gradient(90deg, var(--primary), var(--primary-light));
+            color: #fff;
+        }
+
+        /* ── Buttons ── */
+        .btn-primary {
+            background: var(--primary);
+            border-color: var(--primary);
+        }
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            border-color: var(--primary-dark);
+        }
+        .btn-success {
+            background: var(--primary-light);
+            border-color: var(--primary-light);
+        }
+
+        /* ── Dynamic section items ── */
+        .dynamic-item {
+            background: #fff;
+            border: 1px solid #dee2e6;
+            border-radius: 10px;
+            padding: 1rem 1.25rem;
+            margin-bottom: 0.75rem;
+            position: relative;
+            transition: box-shadow 0.2s;
+        }
+        .dynamic-item:hover {
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+        }
+        .dynamic-item .item-number {
+            font-weight: 700;
+            color: var(--primary);
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.75rem;
+        }
+        .btn-remove {
+            color: #dc3545;
+            background: transparent;
+            border: 1px solid #dc3545;
+            border-radius: 6px;
+            padding: 2px 10px;
+            font-size: 0.82rem;
+            transition: all 0.15s;
+        }
+        .btn-remove:hover {
+            background: #dc3545;
+            color: #fff;
+        }
+
+        /* ── Form labels ── */
+        .form-label {
+            font-weight: 500;
+            font-size: 0.92rem;
+            color: #374151;
+        }
+        .required-star { color: #dc3545; }
+
+        /* ── Page heading ── */
+        .page-heading {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-dark);
+        }
+        .page-subheading {
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+
+        /* ── Detail view ── */
+        .detail-label {
+            font-size: 0.78rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: #6c757d;
+            margin-bottom: 2px;
+        }
+        .detail-value {
+            font-size: 1rem;
+            color: #1a202c;
+        }
+
+        /* ── Table ── */
+        .table th {
+            background: var(--primary);
+            color: #fff;
+            font-weight: 600;
+            font-size: 0.88rem;
+        }
+        .table-hover tbody tr:hover {
+            background-color: #e8f5e9;
+        }
+
+        /* ── JSON viewer ── */
+        pre.json-output {
+            background: #1e1e2e;
+            color: #cdd6f4;
+            border-radius: 10px;
+            padding: 1.5rem;
+            font-size: 0.88rem;
+            line-height: 1.7;
+            overflow-x: auto;
+            max-height: 70vh;
+        }
+
+        /* ── Footer ── */
+        footer {
+            font-size: 0.82rem;
+            color: #9ca3af;
+        }
+    </style>
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-dark navbar-expand-lg mb-4">
+        <div class="container">
+            <a class="navbar-brand" href="{% url 'family:list' %}">
+                <i class="bi bi-people-fill me-2"></i>പാക്കട <span>ഡേറ്റ</span>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navMenu">
+                <ul class="navbar-nav ms-auto align-items-lg-center">
+                    {% if user.is_authenticated %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'family:list' %}">
+                            <i class="bi bi-list-ul me-1"></i>എല്ലാ രേഖകൾ
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'family:create' %}">
+                            <i class="bi bi-plus-circle me-1"></i>പുതിയ ഫോം
+                        </a>
+                    </li>
+                    <li class="nav-item ms-lg-3">
+                        <span class="navbar-text text-white-50 me-2">
+                            <i class="bi bi-person-circle me-1"></i>{{ user.username }}
+                        </span>
+                    </li>
+                    <li class="nav-item">
+                        <form method="post" action="{% url 'logout' %}" class="d-inline">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-outline-light btn-sm">
+                                <i class="bi bi-box-arrow-right me-1"></i>ലോഗൗട്ട്
+                            </button>
+                        </form>
+                    </li>
+                    {% else %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'login' %}">
+                            <i class="bi bi-box-arrow-in-right me-1"></i>ലോഗിൻ
+                        </a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Messages -->
+    <div class="container">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+    </div>
+
+    <!-- Main content -->
+    <main class="container pb-5">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="text-center py-4">
+        <div class="container">
+            <span><a href="https://ntoric.com">ntoric.com</a> © 2026 പാക്കട ഡേറ്റ കളക്ഷൻ &mdash; All entries stored securely.</span>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

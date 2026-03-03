@@ -1,0 +1,336 @@
+import csv
+import json
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.views.generic import ListView, DetailView, TemplateView
+from django.views import View
+from django.shortcuts import render, redirect, get_object_or_404
+from django.http import HttpResponse
+from django.contrib import messages
+from django.utils import timezone
+
+from .models import Family
+
+
+# ── CSV helpers ───────────────────────────────────────────────────────────────
+
+CSV_TOP_FIELDS = [
+    'പഞ്ചായത്ത്', 'വാർഡ്', 'ഫോം നമ്പർ', 'ഗൃഹനാഥന്റെ പേര്',
+    'മൊബൈൽ നമ്പർ', 'ഉപ്പയുടെ പേര്', 'ഉമ്മയുടെ പേര്', 'ഭാര്യയുടെ പേര്',
+]
+
+CSV_HEADERS = (
+    ['id', 'created_at']
+    + CSV_TOP_FIELDS
+    + ['മക്കൾ എണ്ണം', 'സഹോദരിമാർ എണ്ണം', 'മക്കളുടെ വിവരം', 'സഹോദരിമാരുടെ വിവരങ്ങൾ']
+)
+
+
+def _children_summary(children):
+    parts = []
+    for c in children:
+        relation = c.get('ബന്ധം', '')
+        name = c.get('പേര്', '')
+        mobile = c.get('മൊബൈൽ നമ്പർ', '')
+        wife = c.get('ഭാര്യയുടെ പേര്', '')
+        kids = c.get('കുട്ടികൾ', {})
+        above5 = kids.get('5 വയസിനു മുകളിൽ', 0)
+        below5 = kids.get('5 വയസിനു താഴെ', 0)
+        part = f"{relation}: {name}"
+        if mobile:
+            part += f" | {mobile}"
+        if wife:
+            part += f" | ഭാര്യ: {wife}"
+        part += f" | കുട്ടികൾ: {above5}+{below5}"
+        parts.append(part)
+    return ' ; '.join(parts)
+
+
+def _sisters_summary(sisters):
+    parts = []
+    for s in sisters:
+        name = s.get('സഹോദരിയുടെ പേര്', '')
+        mobile = s.get('മൊബൈൽ നമ്പർ', '')
+        kids = s.get('കുട്ടികൾ', {})
+        above5 = kids.get('5 വയസിനു മുകളിൽ', 0)
+        below5 = kids.get('5 വയസിനു താഴെ', 0)
+        part = f"{name}"
+        if mobile:
+            part += f" | {mobile}"
+        part += f" | കുട്ടികൾ: {above5}+{below5}"
+        parts.append(part)
+    return ' ; '.join(parts)
+
+
+def _family_to_csv_row(family):
+    data = family.family_json
+    children = data.get('മക്കളുടെ വിവരം', [])
+    sisters = data.get('സഹോദരിമാരുടെ വിവരങ്ങൾ', [])
+    return (
+        [family.pk, family.created_at.strftime('%Y-%m-%d %H:%M')]
+        + [data.get(f, '') for f in CSV_TOP_FIELDS]
+        + [len(children), len(sisters), _children_summary(children), _sisters_summary(sisters)]
+    )
+
+
+
+class FamilyListView(LoginRequiredMixin, ListView):
+    """Display all family submissions in a table."""
+    model = Family
+    template_name = 'family/list.html'
+    context_object_name = 'families'
+    paginate_by = 20
+
+    def get_queryset(self):
+        return Family.objects.all().order_by('-created_at')
+
+
+class FamilyDetailView(LoginRequiredMixin, DetailView):
+    """Show the full stored JSON for a single family submission."""
+    model = Family
+    template_name = 'family/detail.html'
+    context_object_name = 'family'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['pretty_json'] = json.dumps(
+            self.object.family_json,
+            ensure_ascii=False,
+            indent=2
+        )
+        return context
+
+
+class FamilyCreateView(LoginRequiredMixin, View):
+    """Handle GET (show form) and POST (parse + save) for family data entry."""
+
+    template_name = 'family/form.html'
+
+    def get(self, request):
+        return render(request, self.template_name)
+
+    def post(self, request):
+        data = request.POST
+        errors = []
+
+        # ── Top-level required fields ────────────────────────────────────────
+        panchayath = data.get('panchayath', '').strip()
+        ward = data.get('ward', '').strip()
+        form_number = data.get('form_number', '').strip()
+        head_name = data.get('head_name', '').strip()
+        mobile = data.get('mobile', '').strip()
+        father_name = data.get('father_name', '').strip()
+        mother_name = data.get('mother_name', '').strip()
+        wife_name = data.get('wife_name', '').strip()
+
+        # Validation
+        if not panchayath:
+            errors.append('പഞ്ചായത്ത് നൽകുക.')
+        if not ward:
+            errors.append('വാർഡ് നൽകുക.')
+        if not form_number:
+            errors.append('ഫോം നമ്പർ നൽകുക.')
+        if not head_name:
+            errors.append('ഗൃഹനാഥന്റെ പേര് നൽകുക.')
+        if mobile and (not mobile.isdigit() or len(mobile) != 10):
+            errors.append('മൊബൈൽ നമ്പർ 10 അക്കം ആയിരിക്കണം.')
+
+        # ── Parse children (മക്കൾ) ──────────────────────────────────────────
+        children_list = []
+        child_relations = data.getlist('child_relation')
+        child_names = data.getlist('child_name')
+        child_mobiles = data.getlist('child_mobile')
+        child_wife_names = data.getlist('child_wife_name')
+        child_above5 = data.getlist('child_above5')
+        child_below5 = data.getlist('child_below5')
+
+        num_children = len(child_relations)
+        for i in range(num_children):
+            relation = child_relations[i].strip() if i < len(child_relations) else ''
+            if not relation:
+                continue
+
+            name = child_names[i].strip() if i < len(child_names) else ''
+            child_mobile = child_mobiles[i].strip() if i < len(child_mobiles) else ''
+
+            try:
+                above5 = int(child_above5[i]) if i < len(child_above5) and child_above5[i] else 0
+            except (ValueError, TypeError):
+                above5 = 0
+            try:
+                below5 = int(child_below5[i]) if i < len(child_below5) and child_below5[i] else 0
+            except (ValueError, TypeError):
+                below5 = 0
+
+            if above5 < 0 or below5 < 0:
+                errors.append(f'കുട്ടികളുടെ എണ്ണം 0-ൽ കുറയരുത് (entry {i+1}).')
+                continue
+
+            entry = {
+                'ബന്ധം': relation,
+                'പേര്': name,
+                'മൊബൈൽ നമ്പർ': child_mobile,
+                'കുട്ടികൾ': {
+                    '5 വയസിനു മുകളിൽ': above5,
+                    '5 വയസിനു താഴെ': below5,
+                },
+            }
+            # Include wife field only for 'മകൻ'
+            if relation == 'മകൻ':
+                wife = child_wife_names[i].strip() if i < len(child_wife_names) else ''
+                entry['ഭാര്യയുടെ പേര്'] = wife
+
+            children_list.append(entry)
+
+        # ── Parse sisters (സഹോദരിമാർ) ──────────────────────────────────────
+        sisters_list = []
+        sister_names = data.getlist('sister_name')
+        sister_mobiles = data.getlist('sister_mobile')
+        sister_above5 = data.getlist('sister_above5')
+        sister_below5 = data.getlist('sister_below5')
+
+        num_sisters = len(sister_names)
+        for i in range(num_sisters):
+            name = sister_names[i].strip() if i < len(sister_names) else ''
+            if not name:
+                continue
+
+            sister_mobile = sister_mobiles[i].strip() if i < len(sister_mobiles) else ''
+
+            try:
+                above5 = int(sister_above5[i]) if i < len(sister_above5) and sister_above5[i] else 0
+            except (ValueError, TypeError):
+                above5 = 0
+            try:
+                below5 = int(sister_below5[i]) if i < len(sister_below5) and sister_below5[i] else 0
+            except (ValueError, TypeError):
+                below5 = 0
+
+            if above5 < 0 or below5 < 0:
+                errors.append(f'സഹോദരിയുടെ കുട്ടികളുടെ എണ്ണം 0-ൽ കുറയരുത് (entry {i+1}).')
+                continue
+
+            sisters_list.append({
+                'സഹോദരിയുടെ പേര്': name,
+                'മൊബൈൽ നമ്പർ': sister_mobile,
+                'കുട്ടികൾ': {
+                    '5 വയസിനു മുകളിൽ': above5,
+                    '5 വയസിനു താഴെ': below5,
+                },
+            })
+
+        if errors:
+            return render(request, self.template_name, {'errors': errors, 'post': data})
+
+        # ── Construct exact JSON structure ────────────────────────────────────
+        family_json = {
+            'പഞ്ചായത്ത്': panchayath,
+            'വാർഡ്': ward,
+            'ഫോം നമ്പർ': form_number,
+            'ഗൃഹനാഥന്റെ പേര്': head_name,
+            'മൊബൈൽ നമ്പർ': mobile,
+            'ഉപ്പയുടെ പേര്': father_name,
+            'ഉമ്മയുടെ പേര്': mother_name,
+            'ഭാര്യയുടെ പേര്': wife_name,
+            'മക്കളുടെ വിവരം': children_list,
+            'സഹോദരിമാരുടെ വിവരങ്ങൾ': sisters_list,
+        }
+
+        family = Family.objects.create(family_json=family_json)
+        return redirect('family:detail', pk=family.pk)
+
+
+class SuccessView(TemplateView):
+    template_name = 'family/success.html'
+
+
+# ── Export views ──────────────────────────────────────────────────────────────
+
+class ExportAllJSON(LoginRequiredMixin, View):
+    """Export ALL family records as a single JSON file."""
+
+    def get(self, request):
+        families = Family.objects.all().order_by('id')
+        payload = []
+        for fam in families:
+            payload.append({
+                'id': fam.pk,
+                'created_at': fam.created_at.strftime('%Y-%m-%d %H:%M'),
+                'data': fam.family_json,
+            })
+        content = json.dumps(payload, ensure_ascii=False, indent=2)
+        response = HttpResponse(content, content_type='application/json; charset=utf-8')
+        response['Content-Disposition'] = 'attachment; filename="families_all.json"'
+        return response
+
+
+class ExportAllCSV(LoginRequiredMixin, View):
+    """Export ALL family records as a flat CSV file."""
+
+    def get(self, request):
+        response = HttpResponse(content_type='text/csv; charset=utf-8')
+        response['Content-Disposition'] = 'attachment; filename="families_all.csv"'
+        response.write('\ufeff')  # UTF-8 BOM for Excel compatibility
+        writer = csv.writer(response)
+        writer.writerow(CSV_HEADERS)
+        for fam in Family.objects.all().order_by('id'):
+            writer.writerow(_family_to_csv_row(fam))
+        return response
+
+
+class ExportSingleJSON(LoginRequiredMixin, View):
+    """Export a single Family record as JSON."""
+
+    def get(self, request, pk):
+        family = get_object_or_404(Family, pk=pk)
+        payload = {
+            'id': family.pk,
+            'created_at': family.created_at.strftime('%Y-%m-%d %H:%M'),
+            'data': family.family_json,
+        }
+        content = json.dumps(payload, ensure_ascii=False, indent=2)
+        response = HttpResponse(content, content_type='application/json; charset=utf-8')
+        fname = f"family_{family.pk}.json"
+        response['Content-Disposition'] = f'attachment; filename="{fname}"'
+        return response
+
+
+class ExportSingleCSV(LoginRequiredMixin, View):
+    """Export a single Family record as CSV."""
+
+    def get(self, request, pk):
+        family = get_object_or_404(Family, pk=pk)
+        response = HttpResponse(content_type='text/csv; charset=utf-8')
+        fname = f"family_{family.pk}.csv"
+        response['Content-Disposition'] = f'attachment; filename="{fname}"'
+        response.write('\ufeff')  # UTF-8 BOM for Excel compatibility
+        writer = csv.writer(response)
+        writer.writerow(CSV_HEADERS)
+        writer.writerow(_family_to_csv_row(family))
+        return response
+
+
+class ExportPoster(LoginRequiredMixin, View):
+    """Render the 1080×1920 Islamic-themed JPG poster for a single Family record."""
+
+    def get(self, request, pk):
+        from .poster import render_family_poster
+        family = get_object_or_404(Family, pk=pk)
+        jpg_bytes = render_family_poster(family.family_json)
+        response = HttpResponse(jpg_bytes, content_type='image/jpeg')
+        head_name = family.family_json.get('ഗൃഹനാഥന്റെ പേര്', 'family')
+        # Safe ASCII filename
+        safe_name = f"poster_{family.pk}.jpg"
+        response['Content-Disposition'] = f'attachment; filename="{safe_name}"'
+        return response
+
+
+class FamilyDeleteView(LoginRequiredMixin, View):
+    """Delete a family record (POST only). Confirms via modal in the template."""
+
+    def post(self, request, pk):
+        family = get_object_or_404(Family, pk=pk)
+        name = family.family_json.get('ഗൃഹനാഥന്റെ പേര്', f'#{pk}')
+        family.delete()
+        messages.success(request, f'"{name}" — ഫോം ഡാറ്റ ഡിലീറ്റ് ചെയ്തു.')
+        return redirect('family:list')
+
