@@ -93,13 +93,13 @@
                 <i class="bi bi-pencil-square me-1"></i>എഡിറ്റ്
             </a>
             <button type="button" class="btn btn-outline-danger btn-sm"
-                    data-bs-toggle="modal" data-bs-target="#delModal{{ family.pk }}">
+                    data-bs-toggle="modal" data-bs-target="#delModalMobile{{ family.pk }}">
                 <i class="bi bi-trash3 me-1"></i>ഡിലീറ്റ്
             </button>
         </div>
 
-        <!-- Confirm delete modal -->
-        <div class="modal fade" id="delModal{{ family.pk }}" tabindex="-1">
+        <!-- Confirm delete modal (Mobile) -->
+        <div class="modal fade" id="delModalMobile{{ family.pk }}" tabindex="-1">
             <div class="modal-dialog modal-dialog-centered modal-sm">
                 <div class="modal-content">
                     <div class="modal-header border-0 pb-0">
@@ -179,13 +179,13 @@
                                 <button type="button"
                                         class="btn btn-outline-danger btn-sm" title="ഡിലീറ്റ്"
                                         data-bs-toggle="modal"
-                                        data-bs-target="#delModal{{ family.pk }}">
+                                        data-bs-target="#delModalDesktop{{ family.pk }}">
                                     <i class="bi bi-trash3"></i>
                                 </button>
                             </div>
 
-                            <!-- Confirm delete modal -->
-                            <div class="modal fade" id="delModal{{ family.pk }}" tabindex="-1">
+                            <!-- Confirm delete modal (Desktop) -->
+                            <div class="modal fade" id="delModalDesktop{{ family.pk }}" tabindex="-1">
                                 <div class="modal-dialog modal-dialog-centered modal-sm">
                                     <div class="modal-content">
                                         <div class="modal-header border-0 pb-0">
