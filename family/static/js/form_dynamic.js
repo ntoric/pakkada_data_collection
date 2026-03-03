@@ -91,7 +91,7 @@
                 <div class="col-md-3">
                     <label class="form-label">മൊബൈൽ നമ്പർ</label>
                     <input type="tel" class="form-control" name="child_mobile"
-                           placeholder="10 അക്കം" maxlength="10" inputmode="numeric">
+                           placeholder="Mobile Number" maxlength="15" inputmode="numeric">
                 </div>
 
                 <!-- ഭാര്യ (shown only for മകൻ) -->
@@ -177,7 +177,7 @@
                 <div class="col-md-4">
                     <label class="form-label">മൊബൈൽ നമ്പർ</label>
                     <input type="tel" class="form-control" name="sister_mobile"
-                           placeholder="10 അക്കം" maxlength="10" inputmode="numeric">
+                           placeholder="10 അക്കം" maxlength="15" inputmode="numeric">
                 </div>
 
                 <!-- കുട്ടികൾ counts -->

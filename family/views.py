@@ -125,7 +125,7 @@ def _parse_family_form(data):
     if not ward:        errors.append('വാർഡ് നൽകുക.')
     if not form_number: errors.append('ഫോം നമ്പർ നൽകുക.')
     if not head_name:   errors.append('ഗൃഹനാഥന്റെ പേര് നൽകുക.')
-    if mobile and (not mobile.isdigit() or len(mobile) != 10):
+    if mobile and (not mobile.isdigit() or len(mobile) < 10):
         errors.append('മൊബൈൽ നമ്പർ 10 അക്കം ആയിരിക്കണം.')
 
     children_list = []
@@ -192,6 +192,36 @@ class FamilyCreateView(LoginRequiredMixin, View):
 
     def get(self, request):
         return render(request, self.template_name)
+
+    def post(self, request):
+        """Parse POST data; if valid, create Family; else re-render with errors."""
+        family_json, errors = _parse_family_form(request.POST)
+
+        if errors:
+            # Reconstruct basic fields for repopulation
+            post_data = {
+                'panchayath':  request.POST.get('panchayath', ''),
+                'ward':        request.POST.get('ward', ''),
+                'form_number': request.POST.get('form_number', ''),
+                'head_name':   request.POST.get('head_name', ''),
+                'mobile':      request.POST.get('mobile', ''),
+                'father_name': request.POST.get('father_name', ''),
+                'mother_name': request.POST.get('mother_name', ''),
+                'wife_name':   request.POST.get('wife_name', ''),
+            }
+            return render(request, self.template_name, {
+                'errors': errors,
+                'post': post_data,
+                'prefill_json': json.dumps({
+                    'children': family_json.get('മക്കളുടെ വിവരം', []),
+                    'sisters':  family_json.get('സഹോദരിമാരുടെ വിവരങ്ങൾ', []),
+                }, ensure_ascii=False),
+            })
+
+        # Save record
+        family = Family.objects.create(family_json=family_json)
+        messages.success(request, 'പുതിയ കുടുംബ ഡേറ്റ വിജയകരമായി ചേർത്തു.')
+        return redirect('family:detail', pk=family.pk)
 
 
 class FamilyEditView(LoginRequiredMixin, View):
