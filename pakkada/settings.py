@@ -96,3 +96,15 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 LOGIN_URL = '/accounts/login/'
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/accounts/login/'
+
+# ── Reverse-proxy / CSRF ──────────────────────────────────────────────────────
+# Comma-separated list of trusted origins (set via env for flexibility)
+_trusted = os.environ.get(
+    'CSRF_TRUSTED_ORIGINS',
+    'http://form.ntoric.com,https://form.ntoric.com,http://localhost:8006,http://127.0.0.1:8006'
+)
+CSRF_TRUSTED_ORIGINS = [o.strip() for o in _trusted.split(',') if o.strip()]
+
+# Tell Django to trust the Host header forwarded by Nginx
+USE_X_FORWARDED_HOST = True
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
