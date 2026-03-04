@@ -134,10 +134,21 @@
 
             {% if data|get_value:"മൊബൈൽ നമ്പർ" %}
             <div class="col-sm-6 col-md-4">
-                <div class="detail-label">മൊബൈൽ നമ്പർ</div>
+                <div class="detail-label">മൊബൈൽ നമ്പർ 1</div>
                 <div class="detail-value">
                     <a href="tel:{{ data|get_value:'മൊബൈൽ നമ്പർ' }}" class="text-decoration-none">
                         <i class="bi bi-telephone me-1 text-success"></i>{{ data|get_value:"മൊബൈൽ നമ്പർ" }}
+                    </a>
+                </div>
+            </div>
+            {% endif %}
+
+            {% if data|get_value:"മൊബൈൽ നമ്പർ 2" %}
+            <div class="col-sm-6 col-md-4">
+                <div class="detail-label">മൊബൈൽ നമ്പർ 2</div>
+                <div class="detail-value">
+                    <a href="tel:{{ data|get_value:'മൊബൈൽ നമ്പർ 2' }}" class="text-decoration-none">
+                        <i class="bi bi-telephone me-1 text-success"></i>{{ data|get_value:"മൊബൈൽ നമ്പർ 2" }}
                     </a>
                 </div>
             </div>
@@ -186,10 +197,12 @@
                         <th>#</th>
                         <th>ബന്ധം</th>
                         <th>പേര്</th>
-                        <th>മൊബൈൽ</th>
+                        <th>മൊബൈൽ 1</th>
+                        <th>മൊബൈൽ 2</th>
                         <th>ഭാര്യ</th>
-                        <th>കുട്ടികൾ (5 വയസിനു മുകളിൽ)</th>
-                        <th>കുട്ടികൾ (5 വയസിനു താഴെ)</th>
+                        <th>ഭാര്യയുടെ മൊബൈൽ</th>
+                        <th>കുട്ടികൾ (5+)</th>
+                        <th>കുട്ടികൾ (5-)</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -212,8 +225,22 @@
                             {% else %}—{% endif %}
                         </td>
                         <td>
+                            {% if child|get_value:"മൊബൈൽ നമ്പർ 2" %}
+                            <a href="tel:{{ child|get_value:"മൊബൈൽ നമ്പർ 2" }}" class="text-decoration-none">
+                                <i class="bi bi-telephone me-1 text-success"></i>{{ child|get_value:"മൊബൈൽ നമ്പർ 2" }}
+                            </a>
+                            {% else %}—{% endif %}
+                        </td>
+                        <td>
                             {% if child|get_value:"ഭാര്യയുടെ പേര്" %}
                             {{ child|get_value:"ഭാര്യയുടെ പേര്" }}
+                            {% else %}—{% endif %}
+                        </td>
+                        <td>
+                            {% if child|get_value:"ഭാര്യയുടെ മൊബൈൽ" %}
+                            <a href="tel:{{ child|get_value:"ഭാര്യയുടെ മൊബൈൽ" }}" class="text-decoration-none">
+                                <i class="bi bi-telephone me-1 text-success"></i>{{ child|get_value:"ഭാര്യയുടെ മൊബൈൽ" }}
+                            </a>
                             {% else %}—{% endif %}
                         </td>
                         {% with kids=child|get_value:"കുട്ടികൾ" %}
@@ -251,8 +278,9 @@
                     <tr>
                         <th>#</th>
                         <th>സഹോദരിയുടെ പേര്</th>
-                        <th>മൊബൈൽ</th>
-                        <th>കുട്ടികൾ (5 വയസിനു മുകളിൽ)</th>
+                        <th>മൊബൈൽ 1</th>
+                        <th>മൊബൈൽ 2</th>
+                        <th>കുട്ടികൾ (5+)</th>
                         <th>കുട്ടികൾ (5 വയസിനു താഴെ)</th>
                     </tr>
                 </thead>
@@ -265,6 +293,13 @@
                             {% if sister|get_value:"മൊബൈൽ നമ്പർ" %}
                             <a href="tel:{{ sister|get_value:"മൊബൈൽ നമ്പർ" }}" class="text-decoration-none">
                                 <i class="bi bi-telephone me-1 text-success"></i>{{ sister|get_value:"മൊബൈൽ നമ്പർ" }}
+                            </a>
+                            {% else %}—{% endif %}
+                        </td>
+                        <td>
+                            {% if sister|get_value:"മൊബൈൽ നമ്പർ 2" %}
+                            <a href="tel:{{ sister|get_value:"മൊബൈൽ നമ്പർ 2" }}" class="text-decoration-none">
+                                <i class="bi bi-telephone me-1 text-success"></i>{{ sister|get_value:"മൊബൈൽ നമ്പർ 2" }}
                             </a>
                             {% else %}—{% endif %}
                         </td>

@@ -68,10 +68,10 @@
                     <i class="bi bi-trash3 me-1"></i>നീക്കം
                 </button>
             </div>
-            <div class="row g-3">
+            <div class="row g-2 g-md-3">
 
                 <!-- ബന്ധം -->
-                <div class="col-md-3">
+                <div class="col-12 col-md-3">
                     <label class="form-label">ബന്ധം</label>
                     <select class="form-select child-relation-select" name="child_relation">
                         <option value="">- തിരഞ്ഞെടുക്കുക -</option>
@@ -81,34 +81,49 @@
                 </div>
 
                 <!-- പേര് -->
-                <div class="col-md-4">
+                <div class="col-12 col-md-4">
                     <label class="form-label">പേര്</label>
                     <input type="text" class="form-control" name="child_name"
                            placeholder="മക്കളുടെ പേര്">
                 </div>
 
-                <!-- മൊബൈൽ -->
-                <div class="col-md-3">
-                    <label class="form-label">മൊബൈൽ നമ്പർ</label>
+                <!-- മൊബൈൽ 1 -->
+                <div class="col-12 col-md-2">
+                    <label class="form-label">മൊബൈൽ 1</label>
                     <input type="tel" class="form-control" name="child_mobile"
-                           placeholder="Mobile Number" maxlength="15" inputmode="numeric">
+                           placeholder="Mobile 1" maxlength="15" inputmode="numeric">
+                </div>
+
+                <!-- മൊബൈൽ 2 -->
+                <div class="col-12 col-md-2">
+                    <label class="form-label">മൊബൈൽ 2</label>
+                    <input type="tel" class="form-control" name="child_mobile2"
+                           placeholder="Mobile 2" maxlength="15" inputmode="numeric">
                 </div>
 
                 <!-- ഭാര്യ (shown only for മകൻ) -->
-                <div class="col-md-4 child-wife-field" style="display:none;">
+                <div class="col-12 col-md-4 child-wife-field" style="display:none;">
                     <label class="form-label">ഭാര്യയുടെ പേര്</label>
                     <input type="text" class="form-control child-wife-input"
                            name="child_wife_name" placeholder="ഭാര്യ">
                 </div>
 
+                <!-- ഭാര്യയുടെ മൊബൈൽ (shown only for മകൻ) -->
+                <div class="col-12 col-md-4 child-wife-field" style="display:none;">
+                    <label class="form-label">ഭാര്യയുടെ മൊബൈൽ</label>
+                    <input type="tel" class="form-control child-wife-mobile-input"
+                           name="child_wife_mobile" placeholder="Mobile Number"
+                           maxlength="15" inputmode="numeric">
+                </div>
+
                 <!-- കുട്ടികൾ counts -->
-                <div class="col-md-4">
-                    <label class="form-label">കുട്ടികൾ – 5 വയസിനു മുകളിൽ</label>
+                <div class="col-12 col-md-2">
+                    <label class="form-label">കുട്ടികൾ (5+)</label>
                     <input type="number" class="form-control" name="child_above5"
                            value="0" min="0">
                 </div>
-                <div class="col-md-4">
-                    <label class="form-label">കുട്ടികൾ – 5 വയസിനു താഴെ</label>
+                <div class="col-12 col-md-2">
+                    <label class="form-label">കുട്ടികൾ (5-)</label>
                     <input type="number" class="form-control" name="child_below5"
                            value="0" min="0">
                 </div>
@@ -126,12 +141,14 @@
 
         select.addEventListener('change', function () {
             if (this.value === 'മകൻ') {
-                wifeField.style.display = '';
-                wifeInput.disabled = false;
+                wrapper.querySelectorAll('.child-wife-field').forEach(f => f.style.display = '');
+                wrapper.querySelectorAll('.child-wife-field input').forEach(i => i.disabled = false);
             } else {
-                wifeField.style.display = 'none';
-                wifeInput.disabled = true;
-                wifeInput.value = '';
+                wrapper.querySelectorAll('.child-wife-field').forEach(f => f.style.display = 'none');
+                wrapper.querySelectorAll('.child-wife-field input').forEach(i => {
+                    i.disabled = true;
+                    i.value = '';
+                });
             }
         });
 
@@ -164,30 +181,37 @@
                     <i class="bi bi-trash3 me-1"></i>നീക്കം
                 </button>
             </div>
-            <div class="row g-3">
+            <div class="row g-2 g-md-3">
 
                 <!-- സഹോദരിയുടെ പേര് -->
-                <div class="col-md-5">
-                    <label class="form-label">സഹോദരിയുടെ പേര്</label>
+                <div class="col-12 col-md-4">
+                    <label class="form-label">സහോദരിയുടെ പേര്</label>
                     <input type="text" class="form-control" name="sister_name"
                            placeholder="സഹോദരി">
                 </div>
 
-                <!-- മൊബൈൽ -->
-                <div class="col-md-4">
-                    <label class="form-label">മൊബൈൽ നമ്പർ</label>
+                <!-- മൊബൈൽ 1 -->
+                <div class="col-12 col-md-2">
+                    <label class="form-label">മൊബൈൽ 1</label>
                     <input type="tel" class="form-control" name="sister_mobile"
-                           placeholder="10 അക്കം" maxlength="15" inputmode="numeric">
+                           placeholder="Mobile 1" maxlength="15" inputmode="numeric">
+                </div>
+
+                <!-- മൊബൈൽ 2 -->
+                <div class="col-12 col-md-2">
+                    <label class="form-label">മൊബൈൽ 2</label>
+                    <input type="tel" class="form-control" name="sister_mobile2"
+                           placeholder="Mobile 2" maxlength="15" inputmode="numeric">
                 </div>
 
                 <!-- കുട്ടികൾ counts -->
-                <div class="col-md-3 col-lg-4">
-                    <label class="form-label">കുട്ടികൾ – 5 വയസിനു മുകളിൽ</label>
+                <div class="col-12 col-md-2">
+                    <label class="form-label">കുട്ടികൾ (5+)</label>
                     <input type="number" class="form-control" name="sister_above5"
                            value="0" min="0">
                 </div>
-                <div class="col-md-3 col-lg-4">
-                    <label class="form-label">കുട്ടികൾ – 5 വയസിനു താഴെ</label>
+                <div class="col-12 col-md-2">
+                    <label class="form-label">കുട്ടികൾ (5-)</label>
                     <input type="number" class="form-control" name="sister_below5"
                            value="0" min="0">
                 </div>
@@ -243,7 +267,13 @@
         /* ── Pre-fill for edit mode ────────────────────────────────────────── */
         const prefillEl = document.getElementById('prefillData');
         if (prefillEl) {
-            const prefill = JSON.parse(prefillEl.textContent);
+            let prefill;
+            try {
+                prefill = JSON.parse(prefillEl.textContent);
+            } catch (e) {
+                console.error("Error parsing prefill data:", e);
+                return;
+            }
 
             (prefill.children || []).forEach(function (child) {
                 addChild();
@@ -253,21 +283,24 @@
                 const selectEl = item.querySelector('.child-relation-select');
                 const nameEl = item.querySelector('[name="child_name"]');
                 const mobEl = item.querySelector('[name="child_mobile"]');
+                const mob2El = item.querySelector('[name="child_mobile2"]');
                 const wifeEl = item.querySelector('.child-wife-input');
-                const wifeFld = item.querySelector('.child-wife-field');
+                const wifeMobEl = item.querySelector('.child-wife-mobile-input');
                 const above5El = item.querySelector('[name="child_above5"]');
                 const below5El = item.querySelector('[name="child_below5"]');
 
                 if (selectEl) {
-                    selectEl.value = child['\u0d2c\u0d28\u0d4d\u0d27\u0d02'] || '';
+                    selectEl.value = child['ബന്ധം'] || '';
                     selectEl.dispatchEvent(new Event('change'));
                 }
-                if (nameEl) nameEl.value = child['\u0d2a\u0d47\u0d30\u0d4d'] || '';
-                if (mobEl) mobEl.value = child['\u0d2e\u0d4a\u0d2c\u0d48\u0d7d \u0d28\u0d2e\u0d4d\u0d2a\u0d7c'] || '';
-                if (wifeEl) wifeEl.value = child['\u0d2d\u0d3e\u0d30\u0d4d\u0d2f\u0d2f\u0d41\u0d1f\u0d46 \u0d2a\u0d47\u0d30\u0d4d'] || '';
-                const kids = child['\u0d15\u0d41\u0d1f\u0d4d\u0d1f\u0d3f\u0d15\u0d7e'] || {};
-                if (above5El) above5El.value = kids['5 \u0d35\u0d2f\u0d38\u0d3f\u0d28\u0d41 \u0d2e\u0d41\u0d15\u0d33\u0d3f\u0d7d'] ?? 0;
-                if (below5El) below5El.value = kids['5 \u0d35\u0d2f\u0d38\u0d3f\u0d28\u0d41 \u0d24\u0d3e\u0d34\u0d46'] ?? 0;
+                if (nameEl) nameEl.value = child['പേര്'] || '';
+                if (mobEl) mobEl.value = child['മൊബൈൽ നമ്പർ'] || '';
+                if (mob2El) mob2El.value = child['മൊബൈൽ നമ്പർ 2'] || '';
+                if (wifeEl) wifeEl.value = child['ഭാര്യയുടെ പേര്'] || '';
+                if (wifeMobEl) wifeMobEl.value = child['ഭാര്യയുടെ മൊബൈൽ'] || '';
+                const kids = child['കുട്ടികൾ'] || {};
+                if (above5El) above5El.value = kids['5 വയസിനു മുകളിൽ'] ?? 0;
+                if (below5El) below5El.value = kids['5 വയസിനു താഴെ'] ?? 0;
             });
 
             (prefill.sisters || []).forEach(function (sister) {
@@ -277,14 +310,16 @@
 
                 const nameEl = item.querySelector('[name="sister_name"]');
                 const mobEl = item.querySelector('[name="sister_mobile"]');
+                const mob2El = item.querySelector('[name="sister_mobile2"]');
                 const above5El = item.querySelector('[name="sister_above5"]');
                 const below5El = item.querySelector('[name="sister_below5"]');
 
-                if (nameEl) nameEl.value = sister['\u0d38\u0d39\u0d4b\u0d26\u0d30\u0d3f\u0d2f\u0d41\u0d1f\u0d46 \u0d2a\u0d47\u0d30\u0d4d'] || '';
-                if (mobEl) mobEl.value = sister['\u0d2e\u0d4a\u0d2c\u0d48\u0d7d \u0d28\u0d2e\u0d4d\u0d2a\u0d7c'] || '';
-                const kids = sister['\u0d15\u0d41\u0d1f\u0d4d\u0d1f\u0d3f\u0d15\u0d7e'] || {};
-                if (above5El) above5El.value = kids['5 \u0d35\u0d2f\u0d38\u0d3f\u0d28\u0d41 \u0d2e\u0d41\u0d15\u0d33\u0d3f\u0d7d'] ?? 0;
-                if (below5El) below5El.value = kids['5 \u0d35\u0d2f\u0d38\u0d3f\u0d28\u0d41 \u0d24\u0d3e\u0d34\u0d46'] ?? 0;
+                if (nameEl) nameEl.value = sister['സഹോദരിയുടെ പേര്'] || '';
+                if (mobEl) mobEl.value = sister['മൊബൈൽ നമ്പർ'] || '';
+                if (mob2El) mob2El.value = sister['മൊബൈൽ നമ്പർ 2'] || '';
+                const kids = sister['കുട്ടികൾ'] || {};
+                if (above5El) above5El.value = kids['5 വയസിനു മുകളിൽ'] ?? 0;
+                if (below5El) below5El.value = kids['5 വയസിനു താഴെ'] ?? 0;
             });
         }
     });

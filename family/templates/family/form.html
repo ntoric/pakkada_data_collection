@@ -25,7 +25,7 @@
 {% endif %}
 
 {% if prefill_json %}
-<script id="prefillData" type="application/json">{{ prefill_json }}</script>
+<script id="prefillData" type="application/json">{{ prefill_json|safe }}</script>
 {% endif %}
 
 <form id="familyForm" method="post"
@@ -44,7 +44,7 @@
             <div class="row g-3">
 
                 <!-- പഞ്ചായത്ത് -->
-                <div class="col-md-4">
+                <div class="col-12 col-md-4">
                     <label class="form-label" for="id_panchayath">
                         പഞ്ചായത്ത് <span class="required-star">*</span>
                     </label>
@@ -54,7 +54,7 @@
                 </div>
 
                 <!-- വാർഡ് -->
-                <div class="col-md-4">
+                <div class="col-12 col-md-4">
                     <label class="form-label" for="id_ward">
                         വാർഡ് <span class="required-star">*</span>
                     </label>
@@ -64,7 +64,7 @@
                 </div>
 
                 <!-- ഫോം നമ്പർ -->
-                <div class="col-md-4">
+                <div class="col-12 col-md-4">
                     <label class="form-label" for="id_form_number">
                         ഫോം നമ്പർ <span class="required-star">*</span>
                     </label>
@@ -74,7 +74,7 @@
                 </div>
 
                 <!-- ഗൃഹനാഥന്റെ പേര് -->
-                <div class="col-md-6">
+                <div class="col-12 col-md-6">
                     <label class="form-label" for="id_head_name">
                         ഗൃഹനാഥന്റെ പേര് <span class="required-star">*</span>
                     </label>
@@ -83,10 +83,10 @@
                            value="{{ post.head_name|default:'' }}" required>
                 </div>
 
-                <!-- മൊബൈൽ നമ്പർ -->
-                <div class="col-md-6">
+                <!-- മൊബൈൽ നമ്പർ 1 -->
+                <div class="col-12 col-md-3">
                     <label class="form-label" for="id_mobile">
-                        മൊബൈൽ നമ്പർ
+                        മൊബൈൽ നമ്പർ 1
                     </label>
                     <input type="tel" class="form-control" id="id_mobile"
                            name="mobile" placeholder=""
@@ -94,8 +94,19 @@
                            value="{{ post.mobile|default:'' }}">
                 </div>
 
+                <!-- മൊബൈൽ നമ്പർ 2 -->
+                <div class="col-12 col-md-3">
+                    <label class="form-label" for="id_mobile2">
+                        മൊബൈൽ നമ്പർ 2
+                    </label>
+                    <input type="tel" class="form-control" id="id_mobile2"
+                           name="mobile2" placeholder=""
+                           maxlength="15" inputmode="numeric"
+                           value="{{ post.mobile2|default:'' }}">
+                </div>
+
                 <!-- ഉപ്പയുടെ പേര് -->
-                <div class="col-md-4">
+                <div class="col-12 col-md-4">
                     <label class="form-label" for="id_father_name">ഉപ്പയുടെ പേര്</label>
                     <input type="text" class="form-control" id="id_father_name"
                            name="father_name" placeholder="ഉപ്പ"
@@ -103,7 +114,7 @@
                 </div>
 
                 <!-- ഉമ്മയുടെ പേര് -->
-                <div class="col-md-4">
+                <div class="col-12 col-md-4">
                     <label class="form-label" for="id_mother_name">ഉമ്മയുടെ പേര്</label>
                     <input type="text" class="form-control" id="id_mother_name"
                            name="mother_name" placeholder="ഉമ്മ"
@@ -111,7 +122,7 @@
                 </div>
 
                 <!-- ഭാര്യയുടെ പേര് -->
-                <div class="col-md-4">
+                <div class="col-12 col-md-4">
                     <label class="form-label" for="id_wife_name">ഭാര്യയുടെ പേര്</label>
                     <input type="text" class="form-control" id="id_wife_name"
                            name="wife_name" placeholder="ഭാര്യ"
@@ -165,11 +176,11 @@
     </div>
 
     <!-- Submit -->
-    <div class="d-flex gap-3 justify-content-end mb-4">
-        <a href="{% url 'family:list' %}" class="btn btn-outline-secondary px-4">
+    <div class="d-flex flex-column flex-md-row gap-2 gap-md-3 justify-content-end mb-4">
+        <a href="{% url 'family:list' %}" class="btn btn-outline-secondary px-4 order-2 order-md-1">
             <i class="bi bi-x-lg me-1"></i>റദ്ദ് ചെയ്യുക
         </a>
-        <button type="submit" class="btn btn-primary px-5" id="submitBtn">
+        <button type="submit" class="btn btn-primary px-5 order-1 order-md-2" id="submitBtn">
             <i class="bi bi-save me-1"></i>സേവ് ചെയ്യുക
         </button>
     </div>

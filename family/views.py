@@ -15,7 +15,7 @@ from .models import Family
 
 CSV_TOP_FIELDS = [
     'പഞ്ചായത്ത്', 'വാർഡ്', 'ഫോം നമ്പർ', 'ഗൃഹനാഥന്റെ പേര്',
-    'മൊബൈൽ നമ്പർ', 'ഉപ്പയുടെ പേര്', 'ഉമ്മയുടെ പേര്', 'ഭാര്യയുടെ പേര്',
+    'മൊബൈൽ നമ്പർ', 'മൊബൈൽ നമ്പർ 2', 'ഉപ്പയുടെ പേര്', 'ഉമ്മയുടെ പേര്', 'ഭാര്യയുടെ പേര്',
 ]
 
 CSV_HEADERS = (
@@ -31,15 +31,21 @@ def _children_summary(children):
         relation = c.get('ബന്ധം', '')
         name = c.get('പേര്', '')
         mobile = c.get('മൊബൈൽ നമ്പർ', '')
+        mobile2 = c.get('മൊബൈൽ നമ്പർ 2', '')
         wife = c.get('ഭാര്യയുടെ പേര്', '')
+        wife_mobile = c.get('ഭാര്യയുടെ മൊബൈൽ', '')
         kids = c.get('കുട്ടികൾ', {})
         above5 = kids.get('5 വയസിനു മുകളിൽ', 0)
         below5 = kids.get('5 വയസിനു താഴെ', 0)
         part = f"{relation}: {name}"
         if mobile:
             part += f" | {mobile}"
+        if mobile2:
+            part += f" | {mobile2}"
         if wife:
             part += f" | ഭാര്യ: {wife}"
+            if wife_mobile:
+                part += f" ({wife_mobile})"
         part += f" | കുട്ടികൾ: {above5}+{below5}"
         parts.append(part)
     return ' ; '.join(parts)
@@ -50,12 +56,15 @@ def _sisters_summary(sisters):
     for s in sisters:
         name = s.get('സഹോദരിയുടെ പേര്', '')
         mobile = s.get('മൊബൈൽ നമ്പർ', '')
+        mobile2 = s.get('മൊബൈൽ നമ്പർ 2', '')
         kids = s.get('കുട്ടികൾ', {})
         above5 = kids.get('5 വയസിനു മുകളിൽ', 0)
         below5 = kids.get('5 വയസിനു താഴെ', 0)
         part = f"{name}"
         if mobile:
             part += f" | {mobile}"
+        if mobile2:
+            part += f" | {mobile2}"
         part += f" | കുട്ടികൾ: {above5}+{below5}"
         parts.append(part)
     return ' ; '.join(parts)
@@ -117,6 +126,7 @@ def _parse_family_form(data):
     form_number = data.get('form_number', '').strip()
     head_name   = data.get('head_name', '').strip()
     mobile      = data.get('mobile', '').strip()
+    mobile2     = data.get('mobile2', '').strip()
     father_name = data.get('father_name', '').strip()
     mother_name = data.get('mother_name', '').strip()
     wife_name   = data.get('wife_name', '').strip()
@@ -126,21 +136,26 @@ def _parse_family_form(data):
     if not form_number: errors.append('ഫോം നമ്പർ നൽകുക.')
     if not head_name:   errors.append('ഗൃഹനാഥന്റെ പേര് നൽകുക.')
     if mobile and (not mobile.isdigit() or len(mobile) < 10):
-        errors.append('മൊബൈൽ നമ്പർ 10 അക്കം ആയിരിക്കണം.')
+        errors.append('മൊബൈൽ നമ്പർ 1 10 അക്കം ആയിരിക്കണം.')
+    if mobile2 and (not mobile2.isdigit() or len(mobile2) < 10):
+        errors.append('മൊബൈൽ നമ്പർ 2 10 അക്കം ആയിരിക്കണം.')
 
     children_list = []
-    child_relations  = data.getlist('child_relation')
-    child_names      = data.getlist('child_name')
-    child_mobiles    = data.getlist('child_mobile')
-    child_wife_names = data.getlist('child_wife_name')
-    child_above5     = data.getlist('child_above5')
-    child_below5     = data.getlist('child_below5')
+    child_relations    = data.getlist('child_relation')
+    child_names        = data.getlist('child_name')
+    child_mobiles      = data.getlist('child_mobile')
+    child_mobiles2     = data.getlist('child_mobile2')
+    child_wife_names   = data.getlist('child_wife_name')
+    child_wife_mobiles = data.getlist('child_wife_mobile')
+    child_above5       = data.getlist('child_above5')
+    child_below5       = data.getlist('child_below5')
     for i in range(len(child_relations)):
         relation = child_relations[i].strip() if i < len(child_relations) else ''
         if not relation:
             continue
-        name         = child_names[i].strip()    if i < len(child_names)    else ''
-        child_mobile = child_mobiles[i].strip()  if i < len(child_mobiles)  else ''
+        name          = child_names[i].strip()     if i < len(child_names)     else ''
+        child_mobile  = child_mobiles[i].strip()   if i < len(child_mobiles)   else ''
+        child_mobile2 = child_mobiles2[i].strip()  if i < len(child_mobiles2)  else ''
         try:  above5 = int(child_above5[i]) if i < len(child_above5) and child_above5[i] else 0
         except (ValueError, TypeError): above5 = 0
         try:  below5 = int(child_below5[i]) if i < len(child_below5) and child_below5[i] else 0
@@ -148,22 +163,26 @@ def _parse_family_form(data):
         if above5 < 0 or below5 < 0:
             errors.append(f'കുട്ടികളുടെ എണ്ണം 0-ൽ കുറയരുത് (entry {i+1}).')
             continue
-        entry = {'ബന്ധം': relation, 'പേര്': name, 'മൊബൈൽ നമ്പർ': child_mobile,
+        entry = {'ബന്ധം': relation, 'പേര്': name,
+                 'മൊബൈൽ നമ്പർ': child_mobile, 'മൊബൈൽ നമ്പർ 2': child_mobile2,
                  'കുട്ടികൾ': {'5 വയസിനു മുകളിൽ': above5, '5 വയസിനു താഴെ': below5}}
         if relation == 'മകൻ':
             entry['ഭാര്യയുടെ പേര്'] = child_wife_names[i].strip() if i < len(child_wife_names) else ''
+            entry['ഭാര്യയുടെ മൊബൈൽ'] = child_wife_mobiles[i].strip() if i < len(child_wife_mobiles) else ''
         children_list.append(entry)
 
     sisters_list = []
-    sister_names   = data.getlist('sister_name')
-    sister_mobiles = data.getlist('sister_mobile')
-    sister_above5  = data.getlist('sister_above5')
-    sister_below5  = data.getlist('sister_below5')
+    sister_names    = data.getlist('sister_name')
+    sister_mobiles  = data.getlist('sister_mobile')
+    sister_mobiles2 = data.getlist('sister_mobile2')
+    sister_above5   = data.getlist('sister_above5')
+    sister_below5   = data.getlist('sister_below5')
     for i in range(len(sister_names)):
         name = sister_names[i].strip() if i < len(sister_names) else ''
         if not name:
             continue
-        sister_mobile = sister_mobiles[i].strip() if i < len(sister_mobiles) else ''
+        sister_mobile  = sister_mobiles[i].strip()  if i < len(sister_mobiles)  else ''
+        sister_mobile2 = sister_mobiles2[i].strip() if i < len(sister_mobiles2) else ''
         try:  above5 = int(sister_above5[i]) if i < len(sister_above5) and sister_above5[i] else 0
         except (ValueError, TypeError): above5 = 0
         try:  below5 = int(sister_below5[i]) if i < len(sister_below5) and sister_below5[i] else 0
@@ -171,12 +190,14 @@ def _parse_family_form(data):
         if above5 < 0 or below5 < 0:
             errors.append(f'സഹോദരിയുടെ കുട്ടികളുടെ എണ്ണം 0-ൽ കുറയരുത് (entry {i+1}).')
             continue
-        sisters_list.append({'സഹോദരിയുടെ പേര്': name, 'മൊബൈൽ നമ്പർ': sister_mobile,
+        sisters_list.append({'സഹോദരിയുടെ പേര്': name,
+                              'മൊബൈൽ നമ്പർ': sister_mobile, 'മൊബൈൽ നമ്പർ 2': sister_mobile2,
                               'കുട്ടികൾ': {'5 വയസിനു മുകളിൽ': above5, '5 വയസിനു താഴെ': below5}})
 
     family_json = {
         'പഞ്ചായത്ത്': panchayath, 'വാർഡ്': ward, 'ഫോം നമ്പർ': form_number,
         'ഗൃഹനാഥന്റെ പേര്': head_name, 'മൊബൈൽ നമ്പർ': mobile,
+        'മൊബൈൽ നമ്പർ 2': mobile2,
         'ഉപ്പയുടെ പേര്': father_name, 'ഉമ്മയുടെ പേര്': mother_name,
         'ഭാര്യയുടെ പേര്': wife_name,
         'മക്കളുടെ വിവരം': children_list,
@@ -205,6 +226,7 @@ class FamilyCreateView(LoginRequiredMixin, View):
                 'form_number': request.POST.get('form_number', ''),
                 'head_name':   request.POST.get('head_name', ''),
                 'mobile':      request.POST.get('mobile', ''),
+                'mobile2':     request.POST.get('mobile2', ''),
                 'father_name': request.POST.get('father_name', ''),
                 'mother_name': request.POST.get('mother_name', ''),
                 'wife_name':   request.POST.get('wife_name', ''),
@@ -239,6 +261,7 @@ class FamilyEditView(LoginRequiredMixin, View):
             'form_number':  d.get('ഫോം നമ്പർ', ''),
             'head_name':    d.get('ഗൃഹനാഥന്റെ പേര്', ''),
             'mobile':       d.get('മൊബൈൽ നമ്പർ', ''),
+            'mobile2':      d.get('മൊബൈൽ നമ്പർ 2', ''),
             'father_name':  d.get('ഉപ്പയുടെ പേര്', ''),
             'mother_name':  d.get('ഉമ്മയുടെ പേര്', ''),
             'wife_name':    d.get('ഭാര്യയുടെ പേര്', ''),
@@ -265,6 +288,7 @@ class FamilyEditView(LoginRequiredMixin, View):
                 'form_number': request.POST.get('form_number', d.get('ഫോം നമ്പർ', '')),
                 'head_name':   request.POST.get('head_name',   d.get('ഗൃഹനാഥന്റെ പേര്', '')),
                 'mobile':      request.POST.get('mobile',      d.get('മൊബൈൽ നമ്പർ', '')),
+                'mobile2':     request.POST.get('mobile2',     d.get('മൊബൈൽ നമ്പർ 2', '')),
                 'father_name': request.POST.get('father_name', d.get('ഉപ്പയുടെ പേര്', '')),
                 'mother_name': request.POST.get('mother_name', d.get('ഉമ്മയുടെ പേര്', '')),
                 'wife_name':   request.POST.get('wife_name',   d.get('ഭാര്യയുടെ പേര്', '')),
@@ -272,8 +296,8 @@ class FamilyEditView(LoginRequiredMixin, View):
             return render(request, self.template_name, {
                 'errors': errors, 'post': initial, 'edit_pk': pk,
                 'prefill_json': json.dumps({
-                    'children': d.get('മക്കളുടെ വിവരം', []),
-                    'sisters':  d.get('സഹോദരിമാരുടെ വിവരങ്ങൾ', []),
+                    'children': family_json.get('മക്കളുടെ വിവരം', []),
+                    'sisters':  family_json.get('സഹോദരിമാരുടെ വിവരങ്ങൾ', []),
                 }, ensure_ascii=False),
             })
         family.family_json = family_json

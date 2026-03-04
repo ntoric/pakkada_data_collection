@@ -192,16 +192,18 @@ def render_family_poster(family_data: dict) -> bytes:
     # ════════════════════════════════════════
     # BASIC INFO — 2 columns
     # ════════════════════════════════════════
-    head   = family_data.get('ഗൃഹനാഥന്റെ പേര്', '')
-    mobile = family_data.get('മൊബൈൽ നമ്പർ',     '')
-    father = family_data.get('ഉപ്പയുടെ പേര്',    '')
-    wife   = family_data.get('ഭാര്യയുടെ പേര്',   '')
+    head    = family_data.get('ഗൃഹനാഥന്റെ പേര്', '')
+    mobile  = family_data.get('മൊബൈൽ നമ്പർ',     '')
+    mobile2 = family_data.get('മൊബൈൽ നമ്പർ 2',   '')
+    father  = family_data.get('ഉപ്പയുടെ പേര്',    '')
+    wife    = family_data.get('ഭാര്യയുടെ പേര്',   '')
     mother = family_data.get('ഉമ്മയുടെ പേര്',    '')
 
     left_fields  = [("Name",          head),
                     ("Father's Name", father),
                     ("Mother's Name", mother)]
-    right_fields = [("Mobile",        mobile),
+    right_fields = [("Mobile 1",      mobile),
+                    ("Mobile 2",      mobile2),
                     ("Wife's Name",   wife)]
 
     row_h = _th(draw, "A", F_LABEL) + 10
@@ -218,7 +220,7 @@ def render_family_poster(family_data: dict) -> bytes:
     for lbl, val in right_fields:
         if lbl or val:
             draw.text((rx, info_y2), lbl, font=F_LABEL, fill=NAVY)
-            draw.text((rx + 165, info_y2), f": {val}", font=F_VALUE, fill=NAVY)
+            draw.text((rx + 175, info_y2), f": {val}", font=F_VALUE, fill=NAVY)
             info_y2 += row_h
 
     y = max(info_y, info_y2) + 22
@@ -248,13 +250,17 @@ def render_family_poster(family_data: dict) -> bytes:
             relation = c.get('ബന്ധം', '')
             name     = c.get('പേര്', '')
             mob      = c.get('മൊബൈൽ നമ്പർ', '')
+            mob2     = c.get('മൊബൈൽ നമ്പർ 2', '')
             w2       = c.get('ഭാര്യയുടെ പേര്', '')
+            w2mob    = c.get('ഭാര്യയുടെ മൊബൈൽ', '')
             kids     = c.get('കുട്ടികൾ', {})
             ab5      = kids.get('5 വയസിനു മുകളിൽ', 0)
             bl5      = kids.get('5 വയസിനു താഴെ', 0)
             ls.append(f"Name    : {name}")
-            if mob: ls.append(f"Mobile  : {mob}")
-            if w2:  ls.append(f"Wife    : {w2}")
+            if mob:   ls.append(f"Mob 1   : {mob}")
+            if mob2:  ls.append(f"Mob 2   : {mob2}")
+            if w2:    ls.append(f"Wife    : {w2}")
+            if w2mob: ls.append(f"W. Mob : {w2mob}")
             ls.append(f"Children (5+) : {ab5}")
             ls.append(f"Children (5-) : {bl5}")
             return ls
@@ -310,10 +316,11 @@ def render_family_poster(family_data: dict) -> bytes:
         for sister in sisters:
             name = sister.get('സഹോദരിയുടെ പേര്', '')
             mob  = sister.get('മൊബൈൽ നമ്പർ', '')
+            mob2 = sister.get('മൊബൈൽ നമ്പർ 2', '')
             kids = sister.get('കുട്ടികൾ', {})
             ab5  = kids.get('5 വയസിനു മുകളിൽ', 0)
             bl5  = kids.get('5 വയസിനു താഴെ', 0)
-            cols = [f"Name : {name}", f"Mobile: {mob}",
+            cols = [f"Name : {name}", f"Mob 1: {mob}", f"Mob 2: {mob2}",
                     f"Children (5+) : {ab5}", f"Children (5-) : {bl5}"]
             _draw_sister_card(img, PAD - 10 + sis_pad, sy2,
                                CW + 20 - sis_pad * 2, sis_h, cols, F_SIS)
