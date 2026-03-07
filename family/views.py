@@ -404,6 +404,44 @@ class ExportPreview(LoginRequiredMixin, DetailView):
         context['form_no'] = data.get('ഫോം നമ്പർ', '')
         return context
 
+class PosterPreview(LoginRequiredMixin, DetailView):
+    """HTML preview for family poster with image export options."""
+    model = Family
+    template_name = 'family/poster_preview.html'
+    context_object_name = 'family'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        data = self.object.family_json
+        context['family_name'] = data.get('ഗൃഹനാഥന്റെ പേര്', 'Unknown')
+        context['form_no'] = data.get('ഫോം നമ്പർ', '')
+        
+        # Calculate total children below 5 for members
+        total_makkal_below_5 = 0
+        makkal_list = data.get('മക്കളുടെ വിവരം', [])
+        for m in makkal_list:
+            inner_child_data = m.get('കുട്ടികൾ', {})
+            count = inner_child_data.get('5 വയസിനു താഴെ', 0)
+            try:
+                total_makkal_below_5 += int(count)
+            except (ValueError, TypeError):
+                pass
+        context['total_makkal_below_5'] = total_makkal_below_5
+
+        # Calculate total children below 5 for sisters
+        total_sisters_below_5 = 0
+        sisters_list = data.get('സഹോദരിമാരുടെ വിവരങ്ങൾ', [])
+        for s in sisters_list:
+            inner_child_data = s.get('കുട്ടികൾ', {})
+            count = inner_child_data.get('5 വയസിനു താഴെ', 0)
+            try:
+                total_sisters_below_5 += int(count)
+            except (ValueError, TypeError):
+                pass
+        context['total_sisters_below_5'] = total_sisters_below_5
+
+        return context
+
 
 class FamilyDeleteView(LoginRequiredMixin, View):
     """Delete a family record (POST only). Confirms via modal in the template."""

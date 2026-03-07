@@ -1,0 +1,347 @@
+{% load family_filters %}
+<!DOCTYPE html>
+<html lang="ml">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Poster Preview - {{ family_name }}</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Malayalam:wght@400;500;600;700&display=swap" rel="stylesheet" crossorigin="anonymous">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <!-- html-to-image -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html-to-image/1.11.11/html-to-image.min.js"></script>
+    
+    <style>
+        body {
+            margin: 0;
+            background: #f3f4f6;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-family: 'Noto Sans Malayalam', sans-serif;
+            padding: 40px 0 120px 0;
+        }
+
+        /* Poster Container - A4-ish proportions but sized for screen/capture */
+        .poster {
+            width: 800px;
+            min-height: 1200px;
+            background: linear-gradient(180deg, #0e5a42, #063a2d);
+            color: white;
+            padding: 50px 60px;
+            box-sizing: border-box;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+            border-radius: 4px;
+        }
+
+        /* Watermark */
+        .poster::after {
+            content: "പാക്കട കുടുംബം";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-25deg);
+            font-size: 100px;
+            color: rgba(255, 255, 255, 0.034);
+            white-space: nowrap;
+            pointer-events: none;
+        }
+
+        /* Grain Texture */
+        .poster:before {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            opacity: 0.12;
+            pointer-events: none;
+            background-image: repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.02) 0px, rgba(0, 0, 0, 0.02) 2px, transparent 3px);
+            z-index: 10;
+        }
+
+        .header-title {
+            text-align: center;
+            font-size: 36px;
+            margin-top: 0;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #ffd400;
+            padding-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .meta-row {
+            display: flex;
+            justify-content: space-between;
+            color: #ffd400;
+            font-size: 18px;
+            margin-bottom: 30px;
+            font-weight: 500;
+        }
+        .meta-form-no { color: #ff4d4d; }
+
+        .info-row {
+            display: grid;
+            grid-template-columns: 240px 1fr;
+            align-items: baseline;
+            margin-bottom: 12px;
+        }
+        .info-label {
+            color: #ffd400;
+            font-size: 20px;
+            font-weight: 600;
+        }
+        .info-value {
+            font-size: 20px;
+            font-weight: 500;
+        }
+
+        .sections-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            column-gap: 30px;
+            margin-top: 60px;
+        }
+
+        .data-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            column-gap: 30px;
+            margin-bottom: 8px;
+            align-items: baseline;
+        }
+
+        .section-title {
+            color: #ffd400;
+            font-size: 18px;
+            margin-bottom: 20px;
+            border-bottom: 1px solid rgba(255,212,0,0.3);
+            padding-bottom: 5px;
+            font-weight: 600;
+        }
+
+        .section-subtitle {
+            color: #ffd400;
+            font-size: 11px;
+            font-weight: 600;
+            margin-top: 10px;
+            margin-bottom: 5px;
+            opacity: 0.8;
+            line-height: 1.2;
+            border-top: 1px solid rgba(255,212,0,0.1);
+            padding-top: 5px;
+        }
+
+        .members-list {
+            font-size: 16px;
+            line-height: 1.8;
+            font-weight: 400;
+        }
+        .mobile-highlight {
+            color: #ffd400;
+            font-size: 13px;
+            font-style: italic;
+        }
+
+        /* ── Action Bar ── */
+        .action-bar {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            padding: 12px 24px;
+            border-radius: 50px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            display: flex;
+            gap: 15px;
+            z-index: 1000;
+        }
+        .btn-action {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 600;
+            padding: 10px 24px;
+            border-radius: 30px;
+            transition: all 0.2s;
+            border: none;
+            cursor: pointer;
+            text-decoration: none;
+        }
+        .btn-back { background: #e5e7eb; color: #374151; }
+        .btn-save { background: #0b4a38; color: white; }
+        .btn-share { background: #10b981; color: white; }
+
+        @media print {
+            .action-bar { display: none; }
+            body { background: white; padding: 0; }
+            .poster { box-shadow: none; width: 100%; border-radius: 0; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="poster" id="poster-element">
+        <h1 class="header-title">പാക്കട കുടുംബം</h1>
+
+        <div class="meta-row">
+            <div class="meta-form-no">ഫോം നമ്പർ : {{ form_no }}</div>
+            <div>പഞ്ചായത്ത്‌ : {{ family.family_json|get_value:"പഞ്ചായത്ത്" }}</div>
+            <div>വാർഡ് : {{ family.family_json|get_value:"വാർഡ്" }}</div>
+        </div>
+
+        <div class="info-row">
+            <span class="info-label">ഗൃഹനാഥന്റെ പേര് :</span>
+            <span class="info-value">{{ family.family_json|get_value:"ഗൃഹനാഥന്റെ പേര്" }}</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">ഉപ്പയുടെ പേര് :</span>
+            <span class="info-value">{{ family.family_json|get_value:"ഉപ്പയുടെ പേര്"|default:"-" }}</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">ഉമ്മയുടെ പേര് :</span>
+            <span class="info-value">{{ family.family_json|get_value:"ഉമ്മയുടെ പേര്"|default:"-" }}</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">മൊബൈൽ നമ്പർ :</span>
+            <span class="info-value">{{ family.family_json|get_value:"മൊബൈൽ നമ്പർ" }}</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">ഭാര്യയുടെ പേര് :</span>
+            <span class="info-value">{{ family.family_json|get_value:"ഭാര്യയുടെ പേര്"|default:"-" }}</span>
+        </div>
+
+        <div class="sections-grid">
+            <div class="section-title">മക്കൾ</div>
+            <div class="section-title">മരുമക്കൾ</div>
+            <div class="section-title">കുട്ടികൾ (5+ വയസ്സ്)</div>
+        </div>
+
+        {% for child in family.family_json|get_value:"മക്കളുടെ വിവരം" %}
+        <div class="data-row">
+            <div class="members-list">
+                {{ child|get_value:"പേര്" }}
+                {% if child|get_value:"മൊബൈൽ നമ്പർ" %}
+                    <span class="mobile-highlight">({{ child|get_value:"മൊബൈൽ നമ്പർ" }})</span>
+                {% endif %}
+            </div>
+            <div class="members-list">
+                {{ child|get_value:"ഭാര്യയുടെ പേര്"|default:"-" }}
+            </div>
+            <div class="members-list">
+                {{ child|get_value:"കുട്ടികൾ"|get_value:"5 വയസിനു മുകളിൽ"|default:0 }}
+            </div>
+        </div>
+        {% endfor %}
+
+        <div class="data-row">
+            <div></div>
+            <div></div>
+            <div class="section-subtitle">
+                5 വയസ്സിൽ താഴെ (ആകെ): {{ total_makkal_below_5 }}
+            </div>
+        </div>
+
+        <div class="sections-grid" style="margin-top: 40px;">
+            <div class="section-title">കെട്ടിച്ചയച്ച പെൺമക്കൾ</div>
+            <div class="section-title">കുട്ടികൾ (5+ വയസ്സ്)</div>
+            <div class="section-title">കുട്ടികൾ (5 വയസ്സിൽ താഴെ)</div>
+        </div>
+
+        {% for sister in family.family_json|get_value:"സഹോദരിമാരുടെ വിവരങ്ങൾ" %}
+        <div class="data-row">
+            <div class="members-list">
+                {{ sister|get_value:"സഹോദരിയുടെ പേര്" }}
+                {% if sister|get_value:"മൊബൈൽ നമ്പർ" %}
+                    <span class="mobile-highlight">({{ sister|get_value:"മൊബൈൽ നമ്പർ" }})</span>
+                {% endif %}
+            </div>
+            <div class="members-list text-center">
+                {{ sister|get_value:"കുട്ടികൾ"|get_value:"5 വയസിനു മുകളിൽ"|default:0 }}
+            </div>
+            <div class="members-list text-center">
+                {{ sister|get_value:"കുട്ടികൾ"|get_value:"5 വയസിനു താഴെ"|default:0 }}
+            </div>
+        </div>
+        {% endfor %}
+
+        <div style="position: absolute; bottom: 30px; left: 0; right: 0; text-align: center; font-size: 14px; opacity: 0.6; color: #ffd100;">
+            2026 | പാക്കട കുടുംബം
+        </div>
+    </div>
+
+    <!-- Action Bar -->
+    <div class="action-bar">
+        <a href="{% url 'family:detail' family.pk %}" class="btn-action btn-back">
+            <i class="bi bi-arrow-left"></i> Back
+        </a>
+        <button id="save-btn" class="btn-action btn-save">
+            <i class="bi bi-image"></i> Save JPG
+        </button>
+        <button id="share-btn" class="btn-action btn-share">
+            <i class="bi bi-share"></i> Share
+        </button>
+    </div>
+
+    <script>
+        const element = document.getElementById('poster-element');
+        const familyName = "{{ family_name|escapejs }}";
+        const filename = `poster_${familyName}_${new Date().getTime()}.jpg`;
+
+        async function handleExport(action) {
+            const btn = document.getElementById(action === 'save' ? 'save-btn' : 'share-btn');
+            const originalText = btn.innerHTML;
+            
+            try {
+                btn.innerHTML = `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Processing...`;
+                btn.disabled = true;
+
+                await document.fonts.ready;
+                await new Promise(resolve => setTimeout(resolve, 500));
+
+                const dataUrl = await htmlToImage.toJpeg(element, {
+                    quality: 0.95,
+                    pixelRatio: 2,
+                    backgroundColor: '#0b4a38'
+                });
+
+                if (action === 'save') {
+                    const link = document.createElement('a');
+                    link.download = filename;
+                    link.href = dataUrl;
+                    link.click();
+                } else {
+                    const blob = await (await fetch(dataUrl)).blob();
+                    const file = new File([blob], filename, { type: 'image/jpeg' });
+
+                    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                        await navigator.share({
+                            files: [file],
+                            title: `Family Poster: ${familyName}`,
+                            text: `പാക്കട കുടുംബം: ${familyName}`
+                        });
+                    } else {
+                        // Fallback download
+                        const link = document.createElement('a');
+                        link.download = filename;
+                        link.href = dataUrl;
+                        link.click();
+                    }
+                }
+            } catch (error) {
+                console.error('Export error:', error);
+                alert('Export failed.');
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        }
+
+        document.getElementById('save-btn').addEventListener('click', () => handleExport('save'));
+        document.getElementById('share-btn').addEventListener('click', () => handleExport('share'));
+    </script>
+</body>
+</html>
