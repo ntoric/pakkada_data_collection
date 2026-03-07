@@ -4,7 +4,8 @@ from . import views
 app_name = 'family'
 
 urlpatterns = [
-    path('', views.FamilyListView.as_view(), name='list'),
+    path('', views.LandingView.as_view(), name='landing'),
+    path('records/', views.FamilyListView.as_view(), name='list'),
     path('new/', views.FamilyCreateView.as_view(), name='create'),
     path('<int:pk>/', views.FamilyDetailView.as_view(), name='detail'),
     path('success/', views.SuccessView.as_view(), name='success'),

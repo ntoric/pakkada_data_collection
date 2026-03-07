@@ -118,12 +118,12 @@
 
                 <!-- കുട്ടികൾ counts -->
                 <div class="col-12 col-md-2">
-                    <label class="form-label">കുട്ടികൾ (5+)</label>
+                    <label class="form-label">കുട്ടികൾ (5 വയസ്സിനു മുകളിൽ)</label>
                     <input type="number" class="form-control" name="child_above5"
                            value="0" min="0">
                 </div>
                 <div class="col-12 col-md-2">
-                    <label class="form-label">കുട്ടികൾ (5-)</label>
+                    <label class="form-label">കുട്ടികൾ (5 വയസ്സിന് താഴെ)</label>
                     <input type="number" class="form-control" name="child_below5"
                            value="0" min="0">
                 </div>
@@ -206,12 +206,12 @@
 
                 <!-- കുട്ടികൾ counts -->
                 <div class="col-12 col-md-2">
-                    <label class="form-label">കുട്ടികൾ (5+)</label>
+                    <label class="form-label">കുട്ടികൾ (5 വയസ്സിനു മുകളിൽ)</label>
                     <input type="number" class="form-control" name="sister_above5"
                            value="0" min="0">
                 </div>
                 <div class="col-12 col-md-2">
-                    <label class="form-label">കുട്ടികൾ (5-)</label>
+                    <label class="form-label">കുട്ടികൾ (5 വയസ്സിന് താഴെ)</label>
                     <input type="number" class="form-control" name="sister_below5"
                            value="0" min="0">
                 </div>

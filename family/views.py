@@ -82,7 +82,7 @@ def _family_to_csv_row(family):
 
 
 
-class FamilyListView(LoginRequiredMixin, ListView):
+class FamilyListView(ListView):
     """Display all family submissions in a table."""
     model = Family
     template_name = 'family/list.html'
@@ -102,7 +102,7 @@ class FamilyListView(LoginRequiredMixin, ListView):
         return context
 
 
-class FamilyDetailView(LoginRequiredMixin, DetailView):
+class FamilyDetailView(DetailView):
     """Show the full stored JSON for a single family submission."""
     model = Family
     template_name = 'family/detail.html'
@@ -306,6 +306,16 @@ class FamilyEditView(LoginRequiredMixin, View):
         return redirect('family:detail', pk=family.pk)
 
 
+class LandingView(TemplateView):
+    """Refined landing page for the Pakkada application."""
+    template_name = 'family/landing.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['total_families'] = Family.objects.count()
+        return context
+
+
 class SuccessView(TemplateView):
     template_name = 'family/success.html'
 
@@ -376,7 +386,10 @@ class ExportSingleCSV(LoginRequiredMixin, View):
         return response
 
 
-class ExportPoster(LoginRequiredMixin, View):
+
+
+
+class ExportPoster(View):
     """Render the 1080×1920 Islamic-themed JPG poster for a single Family record."""
 
     def get(self, request, pk):
@@ -391,7 +404,7 @@ class ExportPoster(LoginRequiredMixin, View):
         return response
 
 
-class ExportPreview(LoginRequiredMixin, DetailView):
+class ExportPreview(DetailView):
     """HTML preview for family data with export options."""
     model = Family
     template_name = 'family/export_preview.html'
@@ -404,7 +417,7 @@ class ExportPreview(LoginRequiredMixin, DetailView):
         context['form_no'] = data.get('ഫോം നമ്പർ', '')
         return context
 
-class PosterPreview(LoginRequiredMixin, DetailView):
+class PosterPreview(DetailView):
     """HTML preview for family poster with image export options."""
     model = Family
     template_name = 'family/poster_preview.html'

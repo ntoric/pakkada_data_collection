@@ -1,0 +1,222 @@
+{% extends "base.html" %}
+
+{% block title %}പാക്കട കുടുംബം &mdash; സ്വാഗതം{% endblock %}
+
+{% block container_class %}{% endblock %}
+{% block main_class %}container-fluid p-0{% endblock %}
+
+{% block extra_head %}
+<style>
+    /* ── Loading Splash Screen ── */
+    #loading-screen {
+        position: fixed;
+        top: 0; left: 0;
+        width: 100%; height: 100%;
+        background: radial-gradient(circle at center, #1b533d, #0d3a2b);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+        transition: opacity 0.8s ease-out, visibility 0.8s;
+    }
+
+    .loader-icon {
+        width: 80px;
+        height: 80px;
+        border: 4px solid rgba(255, 255, 255, 0.1);
+        border-top-color: var(--accent);
+        border-radius: 50%;
+        animation: spin 1s infinite linear;
+        margin-bottom: 20px;
+    }
+
+    .loader-text {
+        color: white;
+        font-family: 'Noto Sans Malayalam', sans-serif;
+        font-size: 1.2rem;
+        letter-spacing: 0.1em;
+        opacity: 0.8;
+        animation: pulse 1.5s infinite ease-in-out;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+    @keyframes pulse { 
+        0% { opacity: 0.5; transform: scale(0.95); }
+        50% { opacity: 1; transform: scale(1); }
+        100% { opacity: 0.5; transform: scale(0.95); }
+    }
+
+    /* ── Hero Section ── */
+    .hero-section {
+        min-height: calc(100vh - 76px); /* Full height minus navbar roughly */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: url('https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?q=80&w=2670&auto=format&fit=crop') center/cover no-repeat;
+        position: relative;
+        overflow: hidden;
+        margin-top: -24px;
+        padding: 20px;
+    }
+
+    .hero-overlay {
+        position: absolute;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background: radial-gradient(circle at center, rgba(13, 58, 43, 0.4), rgba(0, 0, 0, 0.8));
+        backdrop-filter: blur(3px);
+    }
+
+    .hero-content {
+        position: relative;
+        z-index: 2;
+        text-align: center;
+        color: white;
+        width: 100%;
+        max-width: 550px;
+        padding: 60px 40px;
+        background: rgba(255, 255, 255, 0.07);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        border-radius: 30px;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        transform: translateY(30px);
+        opacity: 0;
+        transition: all 1.2s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .hero-content.show {
+        transform: translateY(0);
+        opacity: 1;
+    }
+
+    .hero-title {
+        font-size: 3rem;
+        font-weight: 800;
+        margin-bottom: 2.5rem;
+        letter-spacing: -0.02em;
+        line-height: 1.1;
+    }
+
+    .cta-buttons {
+        display: flex;
+        flex-direction: column;
+        gap: 1.25rem;
+        align-items: center;
+    }
+
+    .btn-hero {
+        width: 100%;
+        max-width: 300px;
+        padding: 1.1rem 2rem;
+        font-size: 1.15rem;
+        font-weight: 600;
+        border-radius: 16px;
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        text-decoration: none;
+    }
+
+    .btn-hero-primary {
+        background: var(--accent);
+        color: #1a1a1a;
+        box-shadow: 0 10px 20px -5px rgba(240, 165, 0, 0.5);
+    }
+
+    .btn-hero-primary:hover {
+        transform: translateY(-5px) scale(1.02);
+        box-shadow: 0 20px 30px -10px rgba(240, 165, 0, 0.6);
+        background: #ffb703;
+        color: #000;
+    }
+
+    .btn-hero-outline {
+        background: rgba(255, 255, 255, 0.05);
+        color: white;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .btn-hero-outline:hover {
+        background: rgba(255, 255, 255, 0.15);
+        transform: translateY(-5px) scale(1.02);
+        border-color: rgba(255, 255, 255, 0.6);
+        color: white;
+    }
+
+    @media (max-width: 576px) {
+        .hero-section {
+            min-height: calc(100vh - 70px);
+            padding: 15px;
+        }
+        .hero-content {
+            padding: 50px 25px;
+            border-radius: 24px;
+        }
+        .hero-title {
+            font-size: 2.2rem;
+            margin-bottom: 2rem;
+        }
+        .btn-hero {
+            padding: 1rem 1.5rem;
+            font-size: 1.05rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Loading Screen -->
+<div id="loading-screen">
+    <div class="loader-icon"></div>
+    <div class="loader-text">പാക്കട...</div>
+</div>
+
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="hero-overlay"></div>
+    <div class="container">
+        <div class="hero-content" id="hero-content">
+            <h1 class="hero-title">Welcome to Pakkada Family</h1>
+            <div class="cta-buttons">
+                <a href="{% url 'family:list' %}" class="btn-hero btn-hero-primary">
+                    <i class="bi bi-search"></i> വിവരങ്ങൾ കാണുക
+                </a>
+                {% if not user.is_authenticated %}
+                <a href="{% url 'login' %}" class="btn-hero btn-hero-outline">
+                    <i class="bi bi-box-arrow-in-right"></i> Login
+                </a>
+                {% else %}
+                <a href="{% url 'family:create' %}" class="btn-hero btn-hero-outline">
+                    <i class="bi bi-plus-circle"></i> പുതിയ ഫോം
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const loadingScreen = document.getElementById('loading-screen');
+        const heroContent = document.getElementById('hero-content');
+
+        // Hide loading screen after 1.5 seconds or when everything is ready
+        setTimeout(() => {
+            loadingScreen.style.opacity = '0';
+            loadingScreen.style.visibility = 'hidden';
+            
+            // Trigger hero animation
+            setTimeout(() => {
+                heroContent.classList.add('show');
+            }, 300);
+        }, 1200);
+    });
+</script>
+{% endblock %}

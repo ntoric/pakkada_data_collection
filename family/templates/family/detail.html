@@ -23,15 +23,14 @@
         <a href="{% url 'family:list' %}" class="btn btn-outline-secondary">
             <i class="bi bi-arrow-left me-1"></i>തിരികെ
         </a>
-        <a href="{% url 'family:edit' family.pk %}" class="btn btn-outline-primary">
-            <i class="bi bi-pencil-square me-1"></i>എഡിറ്റ്
-        </a>
+        
         <!-- Per-record export -->
         <div class="dropdown">
             <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
                 <i class="bi bi-download me-1"></i>Export
             </button>
             <ul class="dropdown-menu dropdown-menu-end">
+                {% if user.is_authenticated %}
                 <li>
                     <a class="dropdown-item" href="{% url 'family:export_json' family.pk %}">
                         <i class="bi bi-filetype-json me-2 text-warning"></i>JSON ആയി Export ചെയ്യുക
@@ -43,6 +42,7 @@
                     </a>
                 </li>
                 <li><hr class="dropdown-divider"></li>
+                {% endif %}
                 <li>
                     <a class="dropdown-item" href="{% url 'family:poster_preview' family.pk %}">
                         <i class="bi bi-image me-2 text-info"></i>Poster JPG Export
@@ -55,6 +55,11 @@
                 </li>
             </ul>
         </div>
+
+        {% if user.is_authenticated %}
+        <a href="{% url 'family:edit' family.pk %}" class="btn btn-outline-primary">
+            <i class="bi bi-pencil-square me-1"></i>എഡിറ്റ്
+        </a>
         <a href="{% url 'family:create' %}" class="btn btn-primary">
             <i class="bi bi-plus-circle me-1"></i>പുതിയ ഫോം
         </a>
@@ -63,6 +68,7 @@
                 data-bs-toggle="modal" data-bs-target="#deleteModal">
             <i class="bi bi-trash3 me-1"></i>ഡിലീറ്റ്
         </button>
+        {% endif %}
     </div>
 </div>
 
@@ -206,8 +212,8 @@
                         <th>മൊബൈൽ 2</th>
                         <th>ഭാര്യ</th>
                         <th>ഭാര്യയുടെ മൊബൈൽ</th>
-                        <th>കുട്ടികൾ (5+)</th>
-                        <th>കുട്ടികൾ (5-)</th>
+                        <th>കുട്ടികൾ (5 വയസ്സിനു മുകളിൽ)</th>
+                        <th>കുട്ടികൾ (5 വയസ്സിന് താഴെ)</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -285,7 +291,7 @@
                         <th>പേര്</th>
                         <th>മൊബൈൽ 1</th>
                         <th>മൊബൈൽ 2</th>
-                        <th>കുട്ടികൾ (5+)</th>
+                        <th>കുട്ടികൾ (5 വയസ്സിനു മുകളിൽ)</th>
                         <th>കുട്ടികൾ (5 വയസിനു താഴെ)</th>
                     </tr>
                 </thead>

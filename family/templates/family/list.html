@@ -14,6 +14,7 @@
                 മൊത്തം {{ page_obj.paginator.count }} രേഖകൾ
             </p>
         </div>
+        {% if user.is_authenticated %}
         <div class="d-flex gap-2 flex-wrap">
             <!-- Bulk export -->
             <div class="dropdown">
@@ -37,6 +38,7 @@
                 <i class="bi bi-plus-circle me-1"></i>പുതിയ ഫോം
             </a>
         </div>
+        {% endif %}
     </div>
 
     <!-- Search bar -->
@@ -96,6 +98,7 @@
                class="btn btn-outline-info btn-sm">
                 <i class="bi bi-image"></i>
             </a>
+            {% if user.is_authenticated %}
             <a href="{% url 'family:edit' family.pk %}"
                class="btn btn-outline-secondary btn-sm">
                 <i class="bi bi-pencil-square me-1"></i>എഡിറ്റ്
@@ -104,6 +107,7 @@
                     data-bs-toggle="modal" data-bs-target="#delModalMobile{{ family.pk }}">
                 <i class="bi bi-trash3 me-1"></i>ഡിലീറ്റ്
             </button>
+            {% endif %}
         </div>
 
         <!-- Confirm delete modal (Mobile) -->
@@ -172,6 +176,15 @@
                                    class="btn btn-outline-primary btn-sm" title="കാണുക">
                                     <i class="bi bi-eye"></i>
                                 </a>
+                                <a href="{% url 'family:export_preview' family.pk %}"
+                                   class="btn btn-outline-danger btn-sm" title="PDF Export Preview">
+                                    <i class="bi bi-file-earmark-pdf"></i>
+                                </a>
+                                <a href="{% url 'family:poster_preview' family.pk %}"
+                                   class="btn btn-outline-info btn-sm" title="Poster Image Export">
+                                    <i class="bi bi-image"></i>
+                                </a>
+                                {% if user.is_authenticated %}
                                 <a href="{% url 'family:edit' family.pk %}"
                                    class="btn btn-outline-secondary btn-sm" title="എഡിറ്റ്">
                                     <i class="bi bi-pencil-square"></i>
@@ -184,16 +197,13 @@
                                    class="btn btn-outline-success btn-sm" title="CSV Export">
                                     <i class="bi bi-filetype-csv"></i>
                                 </a>
-                                <a href="{% url 'family:export_preview' family.pk %}"
-                                   class="btn btn-outline-danger btn-sm" title="PDF Export Preview">
-                                    <i class="bi bi-file-earmark-pdf"></i>
-                                </a>
                                 <button type="button"
                                         class="btn btn-outline-danger btn-sm" title="ഡിലീറ്റ്"
                                         data-bs-toggle="modal"
                                         data-bs-target="#delModalDesktop{{ family.pk }}">
                                     <i class="bi bi-trash3"></i>
                                 </button>
+                                {% endif %}
                             </div>
 
                             <!-- Confirm delete modal (Desktop) -->

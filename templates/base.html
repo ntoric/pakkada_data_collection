@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}പാക്കട ഡേറ്റ കളക്ഷൻ{% endblock %}</title>
+    <title>{% block title %}പാക്കട കുടുംബം{% endblock %}</title>
     <meta name="description" content="Family data collection form for Pakkada local area.">
     <!-- Bootstrap 5 CDN -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -233,14 +233,19 @@
     <!-- Navbar -->
     <nav class="navbar navbar-dark navbar-expand-lg mb-4">
         <div class="container">
-            <a class="navbar-brand" href="{% url 'family:list' %}">
-                <i class="bi bi-people-fill me-2"></i>പാക്കട <span>ഡേറ്റ</span>
+            <a class="navbar-brand" href="{% url 'family:landing' %}">
+                <i class="bi bi-people-fill me-2"></i>പാക്കട <span>കുടുംബം</span>
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navMenu">
                 <ul class="navbar-nav ms-auto align-items-lg-center">
+                    <li class="nav-item">
+                        <a class="nav-link text-warning fw-bold" href="https://wa.me/918129490227" target="_blank">
+                            <i class="bi bi-whatsapp me-1"></i>Need Support?
+                        </a>
+                    </li>
                     {% if user.is_authenticated %}
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'family:list' %}">
@@ -261,14 +266,14 @@
                         <form method="post" action="{% url 'logout' %}" class="d-inline">
                             {% csrf_token %}
                             <button type="submit" class="btn btn-outline-light btn-sm">
-                                <i class="bi bi-box-arrow-right me-1"></i>ലോഗൗട്ട്
+                                <i class="bi bi-box-arrow-right me-1"></i>Logout
                             </button>
                         </form>
                     </li>
                     {% else %}
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'login' %}">
-                            <i class="bi bi-box-arrow-in-right me-1"></i>ലോഗിൻ
+                            <i class="bi bi-box-arrow-in-right me-1"></i>Login
                         </a>
                     </li>
                     {% endif %}
@@ -297,7 +302,7 @@
     <!-- Footer -->
     <footer class="text-center py-4">
         <div class="container">
-            <span><a href="https://ntoric.com">ntoric.com</a> © 2026 പാക്കട ഡേറ്റ കളക്ഷൻ &mdash; All entries stored securely.</span>
+            <span><a href="https://ntoric.com">ntoric.com</a> © 2026 പാക്കട കുടുംബം &mdash; All entries stored securely.</span>
         </div>
     </footer>
 
