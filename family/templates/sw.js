@@ -1,4 +1,18 @@
 // sw.js (Template)
+
+self.addEventListener('install', function (event) {
+    self.skipWaiting();
+});
+
+self.addEventListener('activate', function (event) {
+    event.waitUntil(clients.claim());
+});
+
+self.addEventListener('fetch', function (event) {
+    // Basic fetch listener required for PWA installability
+    event.respondWith(fetch(event.request));
+});
+
 self.addEventListener('push', function (event) {
     const eventData = event.data ? event.data.json() : {};
     const title = eventData.head || 'New Notification';
