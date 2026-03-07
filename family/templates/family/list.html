@@ -14,7 +14,7 @@
                 മൊത്തം {{ page_obj.paginator.count }} രേഖകൾ
             </p>
         </div>
-        {% if user.is_authenticated %}
+        {% if user.is_superuser %}
         <div class="d-flex gap-2 flex-wrap">
             <!-- Bulk export -->
             <div class="dropdown">
@@ -98,7 +98,7 @@
                class="btn btn-outline-info btn-sm">
                 <i class="bi bi-image"></i>
             </a>
-            {% if user.is_authenticated %}
+            {% if user.is_superuser %}
             <a href="{% url 'family:edit' family.pk %}"
                class="btn btn-outline-secondary btn-sm">
                 <i class="bi bi-pencil-square me-1"></i>എഡിറ്റ്
@@ -184,7 +184,7 @@
                                    class="btn btn-outline-info btn-sm" title="Poster Image Export">
                                     <i class="bi bi-image"></i>
                                 </a>
-                                {% if user.is_authenticated %}
+                                {% if user.is_superuser %}
                                 <a href="{% url 'family:edit' family.pk %}"
                                    class="btn btn-outline-secondary btn-sm" title="എഡിറ്റ്">
                                     <i class="bi bi-pencil-square"></i>

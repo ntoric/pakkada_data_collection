@@ -1,6 +1,6 @@
 import csv
 import json
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.views.generic import ListView, DetailView, TemplateView
 from django.views import View
 from django.shortcuts import render, redirect, get_object_or_404
@@ -9,6 +9,11 @@ from django.contrib import messages
 from django.utils import timezone
 
 from .models import Family
+
+
+class SuperuserRequiredMixin(UserPassesTestMixin):
+    def test_func(self):
+        return self.request.user.is_superuser
 
 
 # ── CSV helpers ───────────────────────────────────────────────────────────────
@@ -249,7 +254,7 @@ def _parse_family_form(data):
     return family_json, errors
 
 
-class FamilyCreateView(LoginRequiredMixin, View):
+class FamilyCreateView(SuperuserRequiredMixin, View):
     """Handle GET (show form) and POST (parse + save) for family data entry."""
 
     template_name = 'family/form.html'
@@ -289,7 +294,7 @@ class FamilyCreateView(LoginRequiredMixin, View):
         return redirect('family:detail', pk=family.pk)
 
 
-class FamilyEditView(LoginRequiredMixin, View):
+class FamilyEditView(SuperuserRequiredMixin, View):
     """Show the pre-populated edit form (GET) and save updates (POST)."""
 
     template_name = 'family/form.html'
@@ -365,7 +370,7 @@ class SuccessView(TemplateView):
 
 # ── Export views ──────────────────────────────────────────────────────────────
 
-class ExportAllJSON(LoginRequiredMixin, View):
+class ExportAllJSON(SuperuserRequiredMixin, View):
     """Export ALL family records as a single JSON file."""
 
     def get(self, request):
@@ -383,7 +388,7 @@ class ExportAllJSON(LoginRequiredMixin, View):
         return response
 
 
-class ExportAllCSV(LoginRequiredMixin, View):
+class ExportAllCSV(SuperuserRequiredMixin, View):
     """Export ALL family records as a flat CSV file."""
 
     def get(self, request):
@@ -397,7 +402,7 @@ class ExportAllCSV(LoginRequiredMixin, View):
         return response
 
 
-class ExportSingleJSON(LoginRequiredMixin, View):
+class ExportSingleJSON(SuperuserRequiredMixin, View):
     """Export a single Family record as JSON."""
 
     def get(self, request, pk):
@@ -414,7 +419,7 @@ class ExportSingleJSON(LoginRequiredMixin, View):
         return response
 
 
-class ExportSingleCSV(LoginRequiredMixin, View):
+class ExportSingleCSV(SuperuserRequiredMixin, View):
     """Export a single Family record as CSV."""
 
     def get(self, request, pk):
@@ -504,7 +509,7 @@ class PosterPreview(DetailView):
         return context
 
 
-class FamilyDeleteView(LoginRequiredMixin, View):
+class FamilyDeleteView(SuperuserRequiredMixin, View):
     """Delete a family record (POST only). Confirms via modal in the template."""
 
     def post(self, request, pk):
