@@ -36,4 +36,5 @@ urlpatterns = [
 
     # Service worker
     path('sw.js', TemplateView.as_view(template_name='sw.js', content_type='application/javascript'), name='sw_js'),
+    path('.well-known/assetlinks.json', TemplateView.as_view(template_name='assetlinks.json', content_type='application/json'), name='assetlinks_json'),
 ]

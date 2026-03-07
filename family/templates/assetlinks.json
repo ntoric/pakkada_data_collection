@@ -1,0 +1,14 @@
+[
+    {
+        "relation": [
+            "delegate_permission/common.handle_all_urls"
+        ],
+        "target": {
+            "namespace": "android_app",
+            "package_name": "com.ntoric.pakkada.twa",
+            "sha256_cert_fingerprints": [
+                "SHA256: 8E:D6:77:F0:FB:B7:F6:74:DD:D4:D8:4B:C3:21:39:41:52:A5:60:79:E3:7D:9C:EB:DD:25:E0:DD:95:93:39:57"
+            ]
+        }
+    }
+]

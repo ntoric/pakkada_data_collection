@@ -4,16 +4,17 @@
     "description": "Family data collection form for Pakkada local area.",
     "start_url": "/",
     "display": "standalone",
+    "orientation": "portrait",
     "background_color": "#f0f4f8",
     "theme_color": "#1d6f42",
     "icons": [
         {
-            "src": "/static/images/icon-192.png",
+            "src": "/static/images/icon-192-bgremove.png",
             "sizes": "192x192",
             "type": "image/png"
         },
         {
-            "src": "/static/images/icon-512.png",
+            "src": "/static/images/icon-512-bgremove.png",
             "sizes": "512x512",
             "type": "image/png"
         }
