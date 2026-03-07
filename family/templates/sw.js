@@ -18,8 +18,8 @@ self.addEventListener('push', function (event) {
     const title = eventData.head || 'New Notification';
     const options = {
         body: eventData.body || 'You have a new update.',
-        icon: eventData.icon || '/static/images/favicon.png',
-        badge: '/static/images/favicon.png',
+        icon: eventData.icon || '/static/images/icon-192.png',
+        badge: '/static/images/icon-192.png',
         data: {
             url: eventData.url || '/'
         }
