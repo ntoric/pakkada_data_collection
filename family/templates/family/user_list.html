@@ -1,102 +1,100 @@
-{% extends "base.html" %}
+{% extends 'base.html' %}
+{% load static %}
 
-{% block title %}യൂസർ മാനേജ്‌മെന്റ് - പാക്കട{% endblock %}
+{% block title %}യൂസർ മാനേജ്‌മെന്റ് - പാക്കട കുടുംബം{% endblock %}
 
 {% block content %}
-<div class="row justify-content-center">
-    <div class="col-md-10">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2 class="page-heading mb-0">
-                <i class="bi bi-people me-2"></i>യൂസർ മാനേജ്‌മെന്റ്
-            </h2>
-            <a href="{% url 'family:user_create' %}" class="btn btn-primary">
-                <i class="bi bi-person-plus me-1"></i>പുതിയ യൂസറെ ചേർക്കുക
-            </a>
-        </div>
-
-        <div class="card shadow-sm border-0">
-            <div class="card-body p-0">
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle mb-0">
-                        <thead class="table-light">
-                            <tr>
-                                <th class="ps-4">യൂസർനെയിം</th>
-                                <th>പേര് / ഇമെയിൽ</th>
-                                <th>തീയതി</th>
-                                <th>പദവി</th>
-                                <th class="text-end pe-4">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for u in users %}
-                            <tr>
-                                <td class="ps-4">
-                                    <div class="fw-bold">{{ u.username }}</div>
-                                    {% if u == user %}
-                                    <span class="badge bg-info text-dark x-small">You</span>
-                                    {% endif %}
-                                </td>
-                                <td>
-                                    <div class="small text-muted">{{ u.get_full_name|default:"-" }}</div>
-                                    <div class="small text-muted">{{ u.email|default:"-" }}</div>
-                                </td>
-                                <td class="small">{{ u.date_joined|date:"d M Y" }}</td>
-                                <td>
-                                    {% if u.is_superuser %}
-                                    <span class="badge bg-danger">Admin</span>
-                                    {% else %}
-                                    <span class="badge bg-secondary">User</span>
-                                    {% endif %}
-                                </td>
-                                <td class="text-end pe-4">
-                                    {% if u != user %}
-                                    <button type="button" class="btn btn-outline-danger btn-sm" 
-                                            data-bs-toggle="modal" data-bs-target="#deleteUserModal{{ u.pk }}">
-                                        <i class="bi bi-trash"></i>
-                                    </button>
-
-                                    <!-- Delete Modal -->
-                                    <div class="modal fade text-start" id="deleteUserModal{{ u.pk }}" tabindex="-1">
-                                        <div class="modal-dialog modal-dialog-centered">
-                                            <div class="modal-content">
-                                                <div class="modal-header">
-                                                    <h5 class="modal-title">യൂസറെ ഒഴിവാക്കുക</h5>
-                                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                                                </div>
-                                                <div class="modal-body">
-                                                    <strong>{{ u.username }}</strong> എന്ന യൂസറെ ഒഴിവാക്കാൻ ആഗ്രഹിക്കുന്നുണ്ടോ?
-                                                </div>
-                                                <div class="modal-footer">
-                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">റദ്ദാക്കുക</button>
-                                                    <form method="post" action="{% url 'family:user_delete' u.pk %}" onsubmit="return confirm('ഈ യൂസറെ ശാശ്വതമായി ഒഴിവാക്കാൻ ആഗ്രഹിക്കുന്നുണ്ടോ?');">
-                                                        {% csrf_token %}
-                                                        <button type="submit" class="btn btn-danger">ഒഴിവാക്കുക</button>
-                                                    </form>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    {% else %}
-                                    <span class="text-muted small italic">Cannot delete current user</span>
-                                    {% endif %}
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-        
-        <div class="mt-4">
-            <a href="{% url 'family:list' %}" class="btn btn-outline-secondary">
-                <i class="bi bi-arrow-left me-1"></i>തിരികെ പോകുക
-            </a>
-        </div>
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
+    <div>
+        <h2 class="page-heading mb-0">യൂസർ മാനേജ്‌മെന്റ്</h2>
+        <p class="page-subheading mb-0">സിസ്റ്റം ഉപയോക്താക്കളെ ഇവിടെ കൈകാര്യം ചെയ്യാം.</p>
+    </div>
+    <div class="d-flex gap-2">
+        <a href="{% url 'family:send_notification' %}" class="btn btn-info text-white">
+            <i class="bi bi-broadcast me-1"></i>അറിയിപ്പ് അയക്കുക
+        </a>
+        <a href="{% url 'family:user_create' %}" class="btn btn-primary">
+            <i class="bi bi-person-plus me-1"></i>യൂസറെ ചേർക്കുക
+        </a>
     </div>
 </div>
 
-<style>
-    .x-small { font-size: 0.7rem; }
-</style>
+<div class="card border-0 shadow-sm overflow-hidden">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead>
+                <tr>
+                    <th class="ps-4">യൂസർനെയിം</th>
+                    <th>സ്റ്റാറ്റസ്</th>
+                    <th>ചേർന്ന തീയതി</th>
+                    <th class="text-end pe-4">നടപടികൾ</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in users %}
+                <tr>
+                    <td class="ps-4">
+                        <div class="d-flex align-items-center">
+                            <div class="avatar-circle-sm bg-light text-primary me-2 d-flex align-items-center justify-content-center" style="width: 32px; height: 32px; border-radius: 50%;">
+                                <i class="bi bi-person-fill"></i>
+                            </div>
+                            <div>
+                                <span class="fw-bold">{{ user.username }}</span>
+                                {% if user.is_superuser %}
+                                <span class="badge bg-danger ms-1" style="font-size: 0.65rem;">Admin</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        {% if user.is_active %}
+                        <span class="badge bg-success-subtle text-success">Active</span>
+                        {% else %}
+                        <span class="badge bg-secondary-subtle text-secondary">Inactive</span>
+                        {% endif %}
+                    </td>
+                    <td class="text-muted small">
+                        {{ user.date_joined|date:"d M Y" }}
+                    </td>
+                    <td class="text-end pe-4">
+                        {% if user.pk != request.user.pk %}
+                        <button type="button" class="btn btn-link text-danger p-0 border-0" data-bs-toggle="modal" data-bs-target="#deleteModal{{ user.pk }}">
+                            <i class="bi bi-trash3"></i>
+                        </button>
+                        
+                        <!-- Delete Confirmation Modal -->
+                        <div class="modal fade" id="deleteModal{{ user.pk }}" tabindex="-1" aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-centered modal-sm">
+                                <div class="modal-content border-0">
+                                    <div class="modal-body text-center p-4">
+                                        <i class="bi bi-exclamation-circle text-danger mb-3 d-block" style="font-size: 2.5rem;"></i>
+                                        <h5 class="mb-2">ഉറപ്പാണോ?</h5>
+                                        <p class="text-muted small mb-4">"{{ user.username }}" എന്ന യൂസറെ ഒഴിവാക്കണോ?</p>
+                                        <div class="d-flex gap-2">
+                                            <button type="button" class="btn btn-light flex-grow-1" data-bs-dismiss="modal">റദ്ദാക്കുക</button>
+                                            <form action="{% url 'family:user_delete' user.pk %}" method="post" class="flex-grow-1">
+                                                {% csrf_token %}
+                                                <button type="submit" class="btn btn-danger w-100">ഡിലീറ്റ്</button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% else %}
+                        <span class="text-muted small">Current User</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4" class="text-center py-5 text-muted">
+                        യൂസർമാർ ആരും ഇല്ല.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
 {% endblock %}

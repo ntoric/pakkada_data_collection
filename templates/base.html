@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+{% load static %}{% load webpush_notifications %}<!DOCTYPE html>
 <html lang="ml">
 <head>
     <meta charset="UTF-8">
@@ -11,6 +11,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
     <!-- Google Fonts: Noto Sans Malayalam -->
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Malayalam:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    {% webpush_header %}
     <style>
         :root {
             --primary: #1d6f42;
@@ -207,17 +208,6 @@
             }
             .mobile-card:last-child { border-bottom: none; }
 
-            /* Container fluid full edge-to-edge on very small */
-            .container-fluid { padding-left: 0.75rem !important; padding-right: 0.75rem !important; }
-
-            /* Detail section cards */
-            .section-card .card-header { font-size: 0.9rem; }
-
-            /* Detail actions stack */
-            .detail-actions { flex-direction: column; gap: 0.5rem; }
-            .detail-actions .btn { width: 100%; justify-content: center; }
-
-            /* Add spacing between form cards on mobile */
             .section-card { margin-bottom: 1.5rem !important; }
         }
 
@@ -230,6 +220,15 @@
             margin-bottom: 0.6rem;
         }
         .family-mobile-card .actions { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 0.6rem; }
+        
+        /* Webpush Toggle Styling */
+        .webpush-toggle {
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+        .webpush-toggle.active {
+            color: var(--accent) !important;
+        }
     </style>
     {% block extra_head %}{% endblock %}
 </head>
@@ -251,6 +250,11 @@
                         </a>
                     </li>
                     {% if user.is_authenticated %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" id="webpush-subscribe-button" title="Enable Notifications">
+                            <i class="bi bi-bell me-1"></i>Notifications
+                        </a>
+                    </li>
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'family:list' %}">
                             <i class="bi bi-list-ul me-1"></i>എല്ലാ രേഖകൾ
@@ -319,6 +323,55 @@
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    
+    {% if user.is_authenticated %}
+    <script>
+        const webpushBtn = document.getElementById('webpush-subscribe-button');
+        
+        function updateWebpushUI(isSubscribed) {
+            if (isSubscribed) {
+                webpushBtn.classList.add('active');
+                webpushBtn.innerHTML = '<i class="bi bi-bell-fill me-1"></i>Notifications On';
+                webpushBtn.title = 'Disable Notifications';
+            } else {
+                webpushBtn.classList.remove('active');
+                webpushBtn.innerHTML = '<i class="bi bi-bell me-1"></i>Enable Notifications';
+                webpushBtn.title = 'Enable Notifications';
+            }
+        }
+
+        // Initialize webpush state
+        document.addEventListener('DOMContentLoaded', () => {
+            if ('serviceWorker' in navigator && 'PushManager' in window) {
+                navigator.serviceWorker.ready.then(registration => {
+                    registration.pushManager.getSubscription().then(subscription => {
+                        updateWebpushUI(!!subscription);
+                    });
+                });
+            } else {
+                webpushBtn.style.display = 'none';
+            }
+        });
+
+        webpushBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            if (typeof subscribe === 'function' && typeof unsubscribe === 'function') {
+                navigator.serviceWorker.ready.then(registration => {
+                    registration.pushManager.getSubscription().then(subscription => {
+                        if (subscription) {
+                            unsubscribe();
+                            updateWebpushUI(false);
+                        } else {
+                            subscribe();
+                            updateWebpushUI(true);
+                        }
+                    });
+                });
+            }
+        });
+    </script>
+    {% endif %}
+
     {% block extra_js %}{% endblock %}
 </body>
 </html>

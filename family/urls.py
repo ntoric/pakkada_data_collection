@@ -1,4 +1,5 @@
 from django.urls import path
+from django.views.generic import TemplateView
 from . import views
 
 app_name = 'family'
@@ -25,10 +26,14 @@ urlpatterns = [
     path('users/', views.UserListView.as_view(), name='user_list'),
     path('users/new/', views.UserCreateView.as_view(), name='user_create'),
     path('users/<int:pk>/delete/', views.UserDeleteView.as_view(), name='user_delete'),
+    path('users/notifications/send/', views.SendPushNotificationView.as_view(), name='send_notification'),
 
     # Delete
     path('<int:pk>/delete/', views.FamilyDeleteView.as_view(), name='delete'),
 
     # Edit
     path('<int:pk>/edit/', views.FamilyEditView.as_view(), name='edit'),
+
+    # Service worker
+    path('sw.js', TemplateView.as_view(template_name='sw.js', content_type='application/javascript'), name='sw_js'),
 ]

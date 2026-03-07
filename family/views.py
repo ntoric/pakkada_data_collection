@@ -4,7 +4,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.views.generic import ListView, DetailView, TemplateView, CreateView, DeleteView
-from django.urls import reverse_lazy
+from django.urls import reverse_lazy, reverse
 from django.views import View
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse
@@ -12,6 +12,7 @@ from django.contrib import messages
 from django.utils import timezone
 
 from .models import Family
+from webpush import send_user_notification
 
 
 class SuperuserRequiredMixin(UserPassesTestMixin):
@@ -48,6 +49,45 @@ class UserDeleteView(SuperuserRequiredMixin, DeleteView):
             return redirect('family:user_list')
         messages.success(request, f"User {user_to_del.username} deleted.")
         return super().delete(request, *args, **kwargs)
+
+
+class SendPushNotificationView(SuperuserRequiredMixin, View):
+    """Allow superusers to broadcast custom push notifications."""
+    template_name = 'family/send_notification.html'
+
+    def get(self, request):
+        return render(request, self.template_name)
+
+    def post(self, request):
+        title = request.POST.get('title', '').strip()
+        message = request.POST.get('message', '').strip()
+        link = request.POST.get('link', '').strip() or '/'
+
+        if not title or not message:
+            messages.error(request, "ക്രോസ് ചെയ്യാത്ത ശീർഷകവും സന്ദേശവും നൽകുക.")
+            return render(request, self.template_name, {
+                'title_val': title,
+                'message_val': message,
+                'link_val': link
+            })
+
+        payload = {
+            "head": title,
+            "body": message,
+            "url": link
+        }
+
+        count = 0
+        # Broadcast to all users (alternatively, targeted users)
+        for user in User.objects.all():
+            try:
+                send_user_notification(user=user, payload=payload, ttl=3600)
+                count += 1
+            except Exception:
+                pass
+
+        messages.success(request, f"വിജകരമായി {count} ഉപയോക്താക്കൾക്ക് അറിയിപ്പ് അയച്ചു.")
+        return redirect('family:user_list')
 
 
 # ── CSV helpers ───────────────────────────────────────────────────────────────
@@ -330,7 +370,21 @@ class FamilyCreateView(SuperuserRequiredMixin, View):
             })
 
         # Save record
-        family = Family.objects.create(family_json=family_json)
+        photo = request.FILES.get('photo')
+        family = Family.objects.create(family_json=family_json, photo=photo)
+
+        # Trigger Push Notification to Admins
+        payload = {
+            "head": "പുതിയ കുടുംബ ഡേറ്റ",
+            "body": f"{family_json.get('ഗൃഹനാഥന്റെ പേര്')} - ഫോം #{family_json.get('ഫോം നമ്പർ')} ചേർത്തു.",
+            "url": reverse('family:detail', kwargs={'pk': family.pk})
+        }
+        for admin in User.objects.filter(is_superuser=True):
+            try:
+                send_user_notification(user=admin, payload=payload, ttl=1000)
+            except Exception:
+                pass
+
         messages.success(request, 'പുതിയ കുടുംബ ഡേറ്റ വിജയകരമായി ചേർത്തു.')
         return redirect('family:detail', pk=family.pk)
 
@@ -390,6 +444,8 @@ class FamilyEditView(SuperuserRequiredMixin, View):
                 }, ensure_ascii=False),
             })
         family.family_json = family_json
+        if 'photo' in request.FILES:
+            family.photo = request.FILES['photo']
         family.save()
         messages.success(request, 'ഫോം ഡാറ്റ അപ്ഡേറ്റ് ചെയ്തു.')
         return redirect('family:detail', pk=family.pk)
@@ -559,4 +615,3 @@ class FamilyDeleteView(SuperuserRequiredMixin, View):
         family.delete()
         messages.success(request, f'"{name}" — ഫോം ഡാറ്റ ഡിലീറ്റ് ചെയ്തു.')
         return redirect('family:list')
-

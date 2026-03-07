@@ -8,6 +8,7 @@ class Family(models.Model):
     """
     created_at = models.DateTimeField(auto_now_add=True)
     family_json = models.JSONField()
+    photo = models.ImageField(upload_to='family_photos/', null=True, blank=True)
 
     class Meta:
         verbose_name = 'Family'

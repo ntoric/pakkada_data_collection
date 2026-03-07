@@ -27,6 +27,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'webpush',
     'family.apps.FamilyConfig',
 ]
 
@@ -108,3 +109,14 @@ CSRF_TRUSTED_ORIGINS = [o.strip() for o in _trusted.split(',') if o.strip()]
 # Tell Django to trust the Host header forwarded by Nginx
 USE_X_FORWARDED_HOST = True
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+# Media files (uploads)
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
+
+# ── Web Push Notifications ──────────────────────────────────────────────────
+WEBPUSH_SETTINGS = {
+    "VAPID_PUBLIC_KEY": os.environ.get("VAPID_PUBLIC_KEY", "BPDrmgxN4P1-8CwlKGqUYJ2A4BbjzMI2KcTnksQ9C2nfWgH0KReMTBTCF4UWYKhdyTni6k2-hy9Y_1SF3Ix1iNU"),
+    "VAPID_PRIVATE_KEY": os.environ.get("VAPID_PRIVATE_KEY", "_OwNfLYzYy8qNQx0ooANDdaLCi2jVIM2fFmR9GMDdl4"),
+    "VAPID_ADMIN_EMAIL": os.environ.get("VAPID_ADMIN_EMAIL", "admin@ntoric.com")
+}

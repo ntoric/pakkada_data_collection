@@ -30,6 +30,7 @@
 
 <form id="familyForm" method="post"
       action="{% if edit_pk %}{% url 'family:edit' edit_pk %}{% else %}{% url 'family:create' %}{% endif %}"
+      enctype="multipart/form-data"
       novalidate>
     {% csrf_token %}
 
@@ -74,13 +75,19 @@
                 </div>
 
                 <!-- ഗൃഹനാഥന്റെ പേര് -->
-                <div class="col-12 col-md-6">
+                <div class="col-12 col-md-4">
                     <label class="form-label" for="id_head_name">
                         ഗൃഹനാഥന്റെ പേര് <span class="required-star">*</span>
                     </label>
                     <input type="text" class="form-control" id="id_head_name"
                            name="head_name" placeholder="ഗൃഹനാഥന്റെ പൂർണ്ണ പേര്"
                            value="{{ post.head_name|default:'' }}" required>
+                </div>
+
+                <!-- ഫോട്ടോ (Optional) -->
+                <div class="col-12 col-md-4">
+                    <label class="form-label" for="id_photo">ഫോട്ടോ (ഫയൽ തിരഞ്ഞെടുക്കുക)</label>
+                    <input type="file" class="form-control" id="id_photo" name="photo" accept="image/*">
                 </div>
 
                 <!-- മൊബൈൽ നമ്പർ 1 -->
