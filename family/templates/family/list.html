@@ -85,6 +85,10 @@
                     <span class="badge bg-success me-1">വാർഡ് {{ family.family_json|get_value:"വാർഡ്" }}</span>
                     {{ family.family_json|get_value:"പഞ്ചായത്ത്" }}
                 </div>
+                <div class="small mt-1 text-muted">
+                    <span class="me-2">ഭാര്യ: <span class="text-dark">{{ family.family_json|get_value:"ഭാര്യയുടെ പേര്"|default:"-" }}</span></span>
+                    <span>ഉപ്പ: <span class="text-dark">{{ family.family_json|get_value:"ഉപ്പയുടെ പേര്"|default:"-" }}</span></span>
+                </div>
                 <div class="text-muted" style="font-size:0.76rem; margin-top:4px;">
                     {{ family.created_at|date:"d M Y, g:i a" }}
                 </div>
@@ -152,6 +156,8 @@
                         <th style="width: 60px;">#</th>
                         <th>ഗൃഹനാഥന്റെ പേര്</th>
                         <th>ഫോം നമ്പർ</th>
+                        <th>ഭാര്യയുടെ പേര്</th>
+                        <th>ഉപ്പയുടെ പേര്</th>
                         <th>പഞ്ചായത്ത്</th>
                         <th>വാർഡ്</th>
                         <th>തീയതി</th>
@@ -170,6 +176,8 @@
                                 {{ family.family_json|get_value:"ഫോം നമ്പർ" }}
                             </span>
                         </td>
+                        <td>{{ family.family_json|get_value:"ഭാര്യയുടെ പേര്" }}</td>
+                        <td>{{ family.family_json|get_value:"ഉപ്പയുടെ പേര്" }}</td>
                         <td>{{ family.family_json|get_value:"പഞ്ചായത്ത്" }}</td>
                         <td>{{ family.family_json|get_value:"വാർഡ്" }}</td>
                         <td class="text-muted small">
