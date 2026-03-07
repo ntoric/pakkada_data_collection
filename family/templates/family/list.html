@@ -45,27 +45,29 @@
     </div>
 
     <!-- Search bar -->
-    <form method="get" class="mb-0">
-    <div class="input-group">
-        <span class="input-group-text bg-white border-end-0">
-            <i class="bi bi-search text-muted"></i>
-        </span>
-        <input type="search" name="q" class="form-control border-start-0 ps-0"
-               placeholder="ഫോം നം, വാർഡ്, പേര്, മൊബൈൽ...  തിരയുക"
-               value="{{ search_query }}" autocomplete="off">
-        <button class="btn btn-primary" type="submit">തിരയുക</button>
-        {% if search_query %}
-        <a href="{% url 'family:list' %}" class="btn btn-outline-secondary">
-            <i class="bi bi-x-lg"></i>
-        </a>
-        {% endif %}
-    </div>
-    {% if search_query %}
-    <p class="mt-2 text-muted small">
-        <i class="bi bi-funnel me-1"></i>
-        "{{ search_query }}" — {{ page_obj.paginator.count }} ഫലം
-    </p>
-    {% endif %}
+    <form method="get" class="mb-4">
+        <div class="row g-2">
+            <div class="col-md-10">
+                <div class="input-group">
+                    <span class="input-group-text bg-white border-end-0">
+                        <i class="bi bi-search text-muted"></i>
+                    </span>
+                    <input type="search" name="q" class="form-control border-start-0 ps-0"
+                           placeholder="പേര് അല്ലെങ്കിൽ ഫോം നമ്പർ ഉപയോഗിച്ച് തിരയുക (Search by Name or Form No)"
+                           value="{{ search_query }}" autocomplete="off">
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="d-flex gap-1">
+                    <button class="btn btn-primary flex-grow-1" type="submit">തിരയുക</button>
+                    {% if search_query %}
+                    <a href="{% url 'family:list' %}" class="btn btn-outline-secondary">
+                        <i class="bi bi-x-lg"></i>
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
     </form>
 </div>
 

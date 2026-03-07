@@ -174,8 +174,15 @@ class FamilyListView(ListView):
     def get_queryset(self):
         qs = Family.objects.all().order_by('-created_at')
         q = self.request.GET.get('q', '').strip()
+
         if q:
-            qs = qs.filter(family_json__icontains=q)
+            if q.isdigit():
+                # Search by Form Number
+                qs = qs.filter(**{"family_json__ഫോം നമ്പർ__icontains": q})
+            else:
+                # Search by Name
+                qs = qs.filter(**{"family_json__ഗൃഹനാഥന്റെ പേര്__icontains": q})
+            
         return qs
 
     def get_context_data(self, **kwargs):
