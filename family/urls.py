@@ -21,6 +21,11 @@ urlpatterns = [
     path('<int:pk>/export/preview/', views.ExportPreview.as_view(), name='export_preview'),
     path('<int:pk>/poster/preview/', views.PosterPreview.as_view(), name='poster_preview'),
 
+    # User management
+    path('users/', views.UserListView.as_view(), name='user_list'),
+    path('users/new/', views.UserCreateView.as_view(), name='user_create'),
+    path('users/<int:pk>/delete/', views.UserDeleteView.as_view(), name='user_delete'),
+
     # Delete
     path('<int:pk>/delete/', views.FamilyDeleteView.as_view(), name='delete'),
 

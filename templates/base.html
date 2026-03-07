@@ -71,6 +71,10 @@
             border-color: var(--primary-light);
         }
 
+        .bg-primary {
+            background: var(--primary) !important;
+        }
+
         /* ── Dynamic section items ── */
         .dynamic-item {
             background: #fff;
@@ -257,6 +261,13 @@
                             <i class="bi bi-plus-circle me-1"></i>പുതിയ ഫോം
                         </a>
                     </li>
+                    {% if user.is_superuser %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'family:user_list' %}">
+                            <i class="bi bi-people me-1"></i>യൂസർ മാനേജ്‌മെന്റ്
+                        </a>
+                    </li>
+                    {% endif %}
                     <li class="nav-item ms-lg-3">
                         <span class="navbar-text text-white-50 me-2">
                             <i class="bi bi-person-circle me-1"></i>{{ user.username }}

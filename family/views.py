@@ -1,7 +1,10 @@
 import csv
 import json
+from django.contrib.auth.models import User
+from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
-from django.views.generic import ListView, DetailView, TemplateView
+from django.views.generic import ListView, DetailView, TemplateView, CreateView, DeleteView
+from django.urls import reverse_lazy
 from django.views import View
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse
@@ -13,7 +16,38 @@ from .models import Family
 
 class SuperuserRequiredMixin(UserPassesTestMixin):
     def test_func(self):
-        return self.request.user.is_superuser
+        return self.request.user.is_authenticated and self.request.user.is_superuser
+
+
+class UserCreateView(SuperuserRequiredMixin, CreateView):
+    model = User
+    form_class = UserCreationForm
+    template_name = 'family/user_form.html'
+    success_url = reverse_lazy('family:list')
+
+    def form_valid(self, form):
+        # Additional logic if needed (e.g. setting some default flags)
+        return super().form_valid(form)
+
+
+class UserListView(SuperuserRequiredMixin, ListView):
+    model = User
+    template_name = 'family/user_list.html'
+    context_object_name = 'users'
+    ordering = ['-date_joined']
+
+
+class UserDeleteView(SuperuserRequiredMixin, DeleteView):
+    model = User
+    success_url = reverse_lazy('family:user_list')
+
+    def delete(self, request, *args, **kwargs):
+        user_to_del = self.get_object()
+        if user_to_del.is_superuser and User.objects.filter(is_superuser=True).count() <= 1:
+            messages.error(request, "Cannot delete the only superuser.")
+            return redirect('family:user_list')
+        messages.success(request, f"User {user_to_del.username} deleted.")
+        return super().delete(request, *args, **kwargs)
 
 
 # ── CSV helpers ───────────────────────────────────────────────────────────────
