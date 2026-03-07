@@ -1,0 +1,477 @@
+{% load family_filters %}
+<!DOCTYPE html>
+<html lang="ml">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Export Preview - {{ family_name }}</title>
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Malayalam:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" crossorigin="anonymous">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Malayalam:wght@400;600;700&display=swap" rel="stylesheet" crossorigin="anonymous">
+    <!-- html-to-image & jsPDF (Better support for Malayalam ligatures) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html-to-image/1.11.11/html-to-image.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    
+    <style>
+        :root {
+            --primary: #1e3a8a;
+            --primary-light: #3b82f6;
+            --secondary: #10b981;
+            --bg: #f3f4f6;
+            --card-bg: #ffffff;
+            --text-main: #1f2937;
+            --text-muted: #6b7280;
+            --accent: #f59e0b;
+        }
+
+        body {
+            font-family: 'Noto Sans Malayalam', sans-serif;
+            background-color: var(--bg);
+            color: var(--text-main);
+            padding: 20px 0 100px 0;
+        }
+
+        .export-container {
+            max-width: 850px;
+            margin: 0 auto;
+            background: var(--card-bg);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            border-radius: 16px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .export-section {
+            background: white;
+            padding-bottom: 20px;
+        }
+
+        #section-children, #section-sisters {
+            padding-left: 30px;
+            padding-right: 30px;
+        }
+
+        /* ── Header ── */
+        .export-header {
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            color: white;
+            padding: 40px;
+            text-align: center;
+            position: relative;
+        }
+        .export-header h1 {
+            font-weight: 800;
+            margin-bottom: 8px;
+            font-size: 2.25rem;
+        }
+        .export-header .form-no {
+            font-weight: 500;
+            opacity: 0.9;
+            font-size: 1rem;
+            letter-spacing: 0.05em;
+        }
+        .decorative-circle {
+            position: absolute;
+            width: 150px;
+            height: 150px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            top: -50px;
+            right: -50px;
+        }
+
+        /* ── Content ── */
+        .export-content {
+            padding: 40px;
+        }
+
+        .section-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--primary);
+            border-bottom: 2px solid #e5e7eb;
+            padding-bottom: 10px;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 24px;
+            margin-bottom: 40px;
+        }
+        .info-item {
+            display: flex;
+            flex-direction: column;
+        }
+        .info-label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+            letter-spacing: 0.025em;
+        }
+        .info-value {
+            font-size: 1.05rem;
+            font-weight: 500;
+            color: var(--text-main);
+        }
+
+        /* ── Members ── */
+        .member-card {
+            background: rgb(30 70 111);
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            color: white !important;
+        }
+        .member-card.sister {
+            background: #f0fdf4;
+            border-color: #dcfce7;
+        }
+        .member-full-width {
+            grid-column: span 2;
+        }
+        .info-label-white {
+            color: #8ecbff !important;
+            font-weight: 900;
+        }
+        .info-value-white {
+            color: white !important;
+        }
+
+        .info-label-green {
+            color: #164c00 !important;
+            font-weight: 900;
+        }
+        .info-value-green {
+            color: #929292 !important;
+        }
+
+        /* ── Footer ── */
+        .export-footer {
+            padding: 30px 40px;
+            border-top: 1px solid #f3f4f6;
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.875rem;
+        }
+
+        /* ── Action Bar ── */
+        .action-bar {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+            padding: 12px 24px;
+            border-radius: 50px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            display: flex;
+            gap: 16px;
+            z-index: 1000;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        .btn-action {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 600;
+            padding: 10px 24px;
+            border-radius: 30px;
+            transition: all 0.2s;
+        }
+        .btn-download {
+            background: var(--primary);
+            color: white;
+        }
+        .btn-download:hover {
+            background: var(--primary-light);
+            color: white;
+            transform: translateY(-2px);
+        }
+        .btn-share {
+            background: var(--secondary);
+            color: white;
+        }
+        .btn-share:hover {
+            background: #059669;
+            color: white;
+            transform: translateY(-2px);
+        }
+        .btn-back {
+            background: #e5e7eb;
+            color: var(--text-main);
+        }
+
+        @media print {
+            .action-bar { display: none; }
+            body { padding: 0; background: white; }
+            .export-container { box-shadow: none; width: 100%; border-radius: 0; }
+        }
+
+        @media (max-width: 768px) {
+            .info-grid { grid-template-columns: 1fr; }
+            .member-card { grid-template-columns: 1fr; }
+            .member-full-width { grid-column: span 1; }
+            .export-header { padding: 30px 20px; }
+            .export-content { padding: 25px 20px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div id="export-element" class="export-container">
+            <div class="export-section" id="section-basic">
+                <div class="export-header">
+                    <div class="decorative-circle"></div>
+                    <h1>പാക്കട കുടുംബം</h1>
+                    <div class="form-no">ഫോം നമ്പർ: {{ form_no }}</div>
+                </div>
+
+                <div class="export-content">
+                    <!-- Basic Info -->
+                    <div class="section-title">
+                        <i class="bi bi-info-circle-fill"></i> കുടുംബ വിവരങ്ങൾ
+                    </div>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <div class="info-label">ഗൃഹനാഥന്റെ പേര്</div>
+                            <div class="info-value">{{ family.family_json|get_value:"ഗൃഹനാഥന്റെ പേര്" }}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">പഞ്ചായത്ത്</div>
+                            <div class="info-value">{{ family.family_json|get_value:"പഞ്ചായത്ത്" }}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">വാർഡ്</div>
+                            <div class="info-value">{{ family.family_json|get_value:"വാർഡ്" }}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">ഉപ്പയുടെ പേര്</div>
+                            <div class="info-value">{{ family.family_json|get_value:"ഉപ്പയുടെ പേര്"|default:"-" }}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">ഉമ്മയുടെ പേര്</div>
+                            <div class="info-value">{{ family.family_json|get_value:"ഉമ്മയുടെ പേര്"|default:"-" }}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">ഭാര്യയുടെ പേര്</div>
+                            <div class="info-value">{{ family.family_json|get_value:"ഭാര്യയുടെ പേര്"|default:"-" }}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">മൊബൈൽ നമ്പർ</div>
+                            <div class="info-value">{{ family.family_json|get_value:"മൊബൈൽ നമ്പർ" }}</div>
+                        </div>
+                        {% if family.family_json|get_value:"മൊബൈൽ നമ്പർ 2" %}
+                        <div class="info-item">
+                            <div class="info-label">മൊബൈൽ നമ്പർ 2</div>
+                            <div class="info-value">{{ family.family_json|get_value:"മൊബൈൽ നമ്പർ 2" }}</div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="export-content pt-0">
+                <!-- Children -->
+                {% if family.family_json|get_value:"മക്കളുടെ വിവരം" %}
+                <div class="export-section" id="section-children">
+                    <div class="section-title">
+                        <i class="bi bi-people-fill"></i> മക്കളുടെ വിവരം
+                    </div>
+                    {% for child in family.family_json|get_value:"മക്കളുടെ വിവരം" %}
+                    <div class="member-card">
+                        <div class="info-item">
+                            <div class="info-label-white">പേര്</div>
+                            <div class="info-value-white">{{ child|get_value:"പേര്" }}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label-white">ബന്ധം</div>
+                            <div class="info-value-white">{{ child|get_value:"ബന്ധം" }}</div>
+                        </div>
+                        {% if child|get_value:"മൊബൈൽ നമ്പർ" %}
+                        <div class="info-item">
+                            <div class="info-label-white">മൊബൈൽ നമ്പർ</div>
+                            <div class="info-value-white">{{ child|get_value:"മൊബൈൽ നമ്പർ" }}</div>
+                        </div>
+                        {% endif %}
+                        {% if child|get_value:"മൊബൈൽ നമ്പർ 2" %}
+                        <div class="info-item">
+                            <div class="info-label-white">മൊബൈൽ നമ്പർ 2</div>
+                            <div class="info-value-white">{{ child|get_value:"മൊബൈൽ നമ്പർ 2" }}</div>
+                        </div>
+                        {% endif %}
+                        {% if child|get_value:"ഭാര്യയുടെ പേര്" %}
+                        <div class="info-item">
+                            <div class="info-label-white">ഭാര്യയുടെ പേര്</div>
+                            <div class="info-value-white">{{ child|get_value:"ഭാര്യയുടെ പേര്" }}</div>
+                        </div>
+                        {% endif %}
+                        <div class="info-item member-full-width">
+                            <div class="info-label-white">കുട്ടികൾ</div>
+                            <div class="info-value-white">
+                                5 വയസിനു മുകളിൽ: {{ child|get_value:"കുട്ടികൾ"|get_value:"5 വയസിനു മുകളിൽ"|default:0 }} | 
+                                5 വയസിനു താഴെ: {{ child|get_value:"കുട്ടികൾ"|get_value:"5 വയസിനു താഴെ"|default:0 }}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                <!-- Sisters -->
+                {% if family.family_json|get_value:"സഹോദരിമാരുടെ വിവരങ്ങൾ" %}
+                <div class="export-section" id="section-sisters">
+                    <div class="section-title mt-4">
+                        <i class="bi bi-person-heart"></i> കെട്ടിച്ചയച്ച പെൺമക്കൾ
+                    </div>
+                    {% for sister in family.family_json|get_value:"സഹോദരിമാരുടെ വിവരങ്ങൾ" %}
+                    <div class="member-card sister">
+                        <div class="info-item">
+                            <div class="info-label-green">പേര്</div>
+                            <div class="info-value-green">{{ sister|get_value:"സഹോദരിയുടെ പേര്" }}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label-green">മൊബൈൽ നമ്പർ</div>
+                            <div class="info-value-green">{{ sister|get_value:"മൊബൈൽ നമ്പർ"|default:"-" }}</div>
+                        </div>
+                        {% if sister|get_value:"മൊബൈൽ നമ്പർ 2" %}
+                        <div class="info-item">
+                            <div class="info-label-green">മൊബൈൽ നമ്പർ 2</div>
+                            <div class="info-value-green">{{ sister|get_value:"മൊബൈൽ നമ്പർ 2" }}</div>
+                        </div>
+                        {% endif %}
+                        <div class="info-item member-full-width">
+                            <div class="info-label-green">കുട്ടികൾ</div>
+                            <div class="info-value-green">
+                                5 വയസിനു മുകളിൽ: {{ sister|get_value:"കുട്ടികൾ"|get_value:"5 വയസിനു മുകളിൽ"|default:0 }} | 
+                                5 വയസിനു താഴെ: {{ sister|get_value:"കുട്ടികൾ"|get_value:"5 വയസിനു താഴെ"|default:0 }}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+
+            <div class="export-footer">
+                <p>ntoric.com &copy; 2026 | പാക്കട കുടുംബം</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Floating Action Bar -->
+    <div class="action-bar d-print-none">
+        <a href="{% url 'family:detail' family.pk %}" class="btn btn-action btn-back">
+            <i class="bi bi-arrow-left"></i> Back
+        </a>
+        <button id="download-btn" class="btn btn-action btn-download">
+            <i class="bi bi-file-earmark-pdf"></i> Download PDF
+        </button>
+        <button id="share-btn" class="btn btn-action btn-share">
+            <i class="bi bi-share"></i> Share
+        </button>
+    </div>
+
+    <script>
+        const element = document.getElementById('export-element');
+        const familyName = "{{ family_name|escapejs }}";
+        const filename = `family_${familyName}_${new Date().getTime()}.pdf`;
+
+        async function handleExport(action) {
+            const btn = document.getElementById(action === 'download' ? 'download-btn' : 'share-btn');
+            const originalText = btn.innerHTML;
+            
+            try {
+                btn.innerHTML = `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> ${action === 'download' ? 'Generating...' : 'Preparing...'}`;
+                btn.disabled = true;
+
+                await document.fonts.ready;
+                await new Promise(resolve => setTimeout(resolve, 500));
+
+                const { jsPDF } = window.jspdf;
+                const pdf = new jsPDF('p', 'mm', 'a4');
+                const sections = document.querySelectorAll('.export-section');
+                
+                for (let i = 0; i < sections.length; i++) {
+                    const section = sections[i];
+                    
+                    // Convert each section to image
+                    const dataUrl = await htmlToImage.toPng(section, {
+                        quality: 1,
+                        pixelRatio: 2,
+                        backgroundColor: '#ffffff'
+                    });
+
+                    if (i > 0) pdf.addPage();
+
+                    const imgProps = pdf.getImageProperties(dataUrl);
+                    const pageWidth = pdf.internal.pageSize.getWidth();
+                    const pageHeight = pdf.internal.pageSize.getHeight();
+                    
+                    const margin = 2; // Mimimal margin
+                    const maxW = pageWidth - (margin * 2);
+                    const maxH = pageHeight - (margin * 2);
+                    
+                    let imgW = maxW;
+                    let imgH = (imgProps.height * imgW) / imgProps.width;
+                    
+                    // If the section itself is taller than a page, scale it down 
+                    // (though sections should ideally fit on one page)
+                    if (imgH > maxH) {
+                        imgH = maxH;
+                        imgW = (imgProps.width * imgH) / imgProps.height;
+                    }
+                    
+                    const x = (pageWidth - imgW) / 2;
+                    const y = margin;
+
+                    pdf.addImage(dataUrl, 'PNG', x, y, imgW, imgH);
+                }
+
+                if (action === 'download') {
+                    pdf.save(filename);
+                } else {
+                    const pdfBlob = pdf.output('blob');
+                    const file = new File([pdfBlob], filename, { type: 'application/pdf' });
+
+                    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                        await navigator.share({
+                            files: [file],
+                            title: `പാക്കട കുടുംബം: ${familyName}`,
+                            text: `കുടുംബ വിവരങ്ങൾ: ${familyName}`
+                        });
+                    } else {
+                        alert('Sharing not supported on this browser. Downloading instead.');
+                        pdf.save(filename);
+                    }
+                }
+            } catch (error) {
+                console.error('Export error:', error);
+                alert('Export failed. Please try again.');
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        }
+
+        document.getElementById('download-btn').addEventListener('click', () => handleExport('download'));
+        document.getElementById('share-btn').addEventListener('click', () => handleExport('share'));
+    </script>
+</body>
+</html>

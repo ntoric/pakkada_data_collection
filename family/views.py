@@ -391,6 +391,20 @@ class ExportPoster(LoginRequiredMixin, View):
         return response
 
 
+class ExportPreview(LoginRequiredMixin, DetailView):
+    """HTML preview for family data with export options."""
+    model = Family
+    template_name = 'family/export_preview.html'
+    context_object_name = 'family'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        data = self.object.family_json
+        context['family_name'] = data.get('ഗൃഹനാഥന്റെ പേര്', 'Unknown')
+        context['form_no'] = data.get('ഫോം നമ്പർ', '')
+        return context
+
+
 class FamilyDeleteView(LoginRequiredMixin, View):
     """Delete a family record (POST only). Confirms via modal in the template."""
 

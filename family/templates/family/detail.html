@@ -48,6 +48,11 @@
                         <i class="bi bi-image me-2 text-info"></i>Poster JPG ഡൗൺലോഡ്
                     </a>
                 </li>
+                <li>
+                    <a class="dropdown-item" href="{% url 'family:export_preview' family.pk %}">
+                        <i class="bi bi-file-earmark-pdf me-2 text-danger"></i>PDF Export (Preview)
+                    </a>
+                </li>
             </ul>
         </div>
         <a href="{% url 'family:create' %}" class="btn btn-primary">
@@ -268,7 +273,7 @@
 {% if sisters %}
 <div class="card section-card mb-4">
     <div class="card-header">
-        <i class="bi bi-person-hearts me-2"></i>സഹോദരിമാരുടെ വിവരങ്ങൾ
+        <i class="bi bi-person-hearts me-2"></i>കെട്ടിച്ചയച്ച പെൺമക്കൾ
         <span class="badge bg-white text-success ms-2">{{ sisters|length }}</span>
     </div>
     <div class="card-body p-0">
@@ -277,7 +282,7 @@
                 <thead>
                     <tr>
                         <th>#</th>
-                        <th>സഹോദരിയുടെ പേര്</th>
+                        <th>പേര്</th>
                         <th>മൊബൈൽ 1</th>
                         <th>മൊബൈൽ 2</th>
                         <th>കുട്ടികൾ (5+)</th>

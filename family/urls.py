@@ -17,6 +17,7 @@ urlpatterns = [
     path('<int:pk>/export/json/', views.ExportSingleJSON.as_view(), name='export_json'),
     path('<int:pk>/export/csv/', views.ExportSingleCSV.as_view(), name='export_csv'),
     path('<int:pk>/export/poster/', views.ExportPoster.as_view(), name='export_poster'),
+    path('<int:pk>/export/preview/', views.ExportPreview.as_view(), name='export_preview'),
 
     # Delete
     path('<int:pk>/delete/', views.FamilyDeleteView.as_view(), name='delete'),

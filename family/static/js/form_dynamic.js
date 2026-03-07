@@ -176,7 +176,7 @@
 
         wrapper.innerHTML = `
             <div class="d-flex align-items-center justify-content-between mb-3">
-                <span class="item-number">സഹോദരി ${sisterCount}</span>
+                <span class="item-number">കെട്ടിച്ചയച്ച പെൺമക്കൾ ${sisterCount}</span>
                 <button type="button" class="btn-remove" aria-label="Remove entry">
                     <i class="bi bi-trash3 me-1"></i>നീക്കം
                 </button>
@@ -185,7 +185,7 @@
 
                 <!-- സഹോദരിയുടെ പേര് -->
                 <div class="col-12 col-md-4">
-                    <label class="form-label">സහോദരിയുടെ പേര്</label>
+                    <label class="form-label">പേര്</label>
                     <input type="text" class="form-control" name="sister_name"
                            placeholder="സഹോദരി">
                 </div>
