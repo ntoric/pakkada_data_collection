@@ -17,3 +17,22 @@ def get_value(dictionary, key):
     if not isinstance(dictionary, dict):
         return ''
     return dictionary.get(key, '')
+
+
+@register.filter(name='mask_mobile')
+def mask_mobile(value):
+    """
+    Shows only the last 4 digits of a mobile number,
+    replacing other characters with '*'.
+    Example: 9876543210 -> ******3210
+    """
+    if not value:
+        return value
+    
+    # Keep last 4, mask others
+    if len(str(value)) <= 4:
+        return value
+    
+    masked_part = '*' * (len(str(value)) - 4)
+    last_four = str(value)[-4:]
+    return f"{masked_part}{last_four}"

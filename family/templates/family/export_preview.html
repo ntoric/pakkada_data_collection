@@ -275,12 +275,24 @@
                         </div>
                         <div class="info-item">
                             <div class="info-label">മൊബൈൽ നമ്പർ</div>
-                            <div class="info-value">{{ family.family_json|get_value:"മൊബൈൽ നമ്പർ" }}</div>
+                            <div class="info-value">
+                                {% if user.is_authenticated %}
+                                    {{ family.family_json|get_value:"മൊബൈൽ നമ്പർ" }}
+                                {% else %}
+                                    {{ family.family_json|get_value:"മൊബൈൽ നമ്പർ"|mask_mobile }}
+                                {% endif %}
+                            </div>
                         </div>
                         {% if family.family_json|get_value:"മൊബൈൽ നമ്പർ 2" %}
                         <div class="info-item">
                             <div class="info-label">മൊബൈൽ നമ്പർ 2</div>
-                            <div class="info-value">{{ family.family_json|get_value:"മൊബൈൽ നമ്പർ 2" }}</div>
+                            <div class="info-value">
+                                {% if user.is_authenticated %}
+                                    {{ family.family_json|get_value:"മൊബൈൽ നമ്പർ 2" }}
+                                {% else %}
+                                    {{ family.family_json|get_value:"മൊബൈൽ നമ്പർ 2"|mask_mobile }}
+                                {% endif %}
+                            </div>
                         </div>
                         {% endif %}
                     </div>
@@ -307,13 +319,25 @@
                         {% if child|get_value:"മൊബൈൽ നമ്പർ" %}
                         <div class="info-item">
                             <div class="info-label-white">മൊബൈൽ നമ്പർ</div>
-                            <div class="info-value-white">{{ child|get_value:"മൊബൈൽ നമ്പർ" }}</div>
+                            <div class="info-value-white">
+                                {% if user.is_authenticated %}
+                                    {{ child|get_value:"മൊബൈൽ നമ്പർ" }}
+                                {% else %}
+                                    {{ child|get_value:"മൊബൈൽ നമ്പർ"|mask_mobile }}
+                                {% endif %}
+                            </div>
                         </div>
                         {% endif %}
                         {% if child|get_value:"മൊബൈൽ നമ്പർ 2" %}
                         <div class="info-item">
                             <div class="info-label-white">മൊബൈൽ നമ്പർ 2</div>
-                            <div class="info-value-white">{{ child|get_value:"മൊബൈൽ നമ്പർ 2" }}</div>
+                            <div class="info-value-white">
+                                {% if user.is_authenticated %}
+                                    {{ child|get_value:"മൊബൈൽ നമ്പർ 2" }}
+                                {% else %}
+                                    {{ child|get_value:"മൊബൈൽ നമ്പർ 2"|mask_mobile }}
+                                {% endif %}
+                            </div>
                         </div>
                         {% endif %}
                         {% if child|get_value:"ഭാര്യയുടെ പേര്" %}
@@ -348,12 +372,24 @@
                         </div>
                         <div class="info-item">
                             <div class="info-label-green">മൊബൈൽ നമ്പർ</div>
-                            <div class="info-value-green">{{ sister|get_value:"മൊബൈൽ നമ്പർ"|default:"-" }}</div>
+                            <div class="info-value-green">
+                                {% if user.is_authenticated %}
+                                    {{ sister|get_value:"മൊബൈൽ നമ്പർ"|default:"-" }}
+                                {% else %}
+                                    {{ sister|get_value:"മൊബൈൽ നമ്പർ"|mask_mobile }}
+                                {% endif %}
+                            </div>
                         </div>
                         {% if sister|get_value:"മൊബൈൽ നമ്പർ 2" %}
                         <div class="info-item">
                             <div class="info-label-green">മൊബൈൽ നമ്പർ 2</div>
-                            <div class="info-value-green">{{ sister|get_value:"മൊബൈൽ നമ്പർ 2" }}</div>
+                            <div class="info-value-green">
+                                {% if user.is_authenticated %}
+                                    {{ sister|get_value:"മൊബൈൽ നമ്പർ 2" }}
+                                {% else %}
+                                    {{ sister|get_value:"മൊബൈൽ നമ്പർ 2"|mask_mobile }}
+                                {% endif %}
+                            </div>
                         </div>
                         {% endif %}
                         <div class="info-item member-full-width">

@@ -207,7 +207,13 @@
         </div>
         <div class="info-row">
             <span class="info-label">മൊബൈൽ നമ്പർ :</span>
-            <span class="info-value">{{ family.family_json|get_value:"മൊബൈൽ നമ്പർ" }}</span>
+            <span class="info-value">
+                {% if user.is_authenticated %}
+                    {{ family.family_json|get_value:"മൊബൈൽ നമ്പർ" }}
+                {% else %}
+                    {{ family.family_json|get_value:"മൊബൈൽ നമ്പർ"|mask_mobile }}
+                {% endif %}
+            </span>
         </div>
         <div class="info-row">
             <span class="info-label">ഭാര്യയുടെ പേര് :</span>
@@ -225,7 +231,13 @@
             <div class="members-list">
                 {{ child|get_value:"പേര്" }}
                 {% if child|get_value:"മൊബൈൽ നമ്പർ" %}
-                    <span class="mobile-highlight">({{ child|get_value:"മൊബൈൽ നമ്പർ" }})</span>
+                    <span class="mobile-highlight">(
+                        {% if user.is_authenticated %}
+                            {{ child|get_value:"മൊബൈൽ നമ്പർ" }}
+                        {% else %}
+                            {{ child|get_value:"മൊബൈൽ നമ്പർ"|mask_mobile }}
+                        {% endif %}
+                    )</span>
                 {% endif %}
             </div>
             <div class="members-list">
@@ -256,7 +268,13 @@
             <div class="members-list">
                 {{ sister|get_value:"സഹോദരിയുടെ പേര്" }}
                 {% if sister|get_value:"മൊബൈൽ നമ്പർ" %}
-                    <span class="mobile-highlight">({{ sister|get_value:"മൊബൈൽ നമ്പർ" }})</span>
+                    <span class="mobile-highlight">(
+                        {% if user.is_authenticated %}
+                            {{ sister|get_value:"മൊബൈൽ നമ്പർ" }}
+                        {% else %}
+                            {{ sister|get_value:"മൊബൈൽ നമ്പർ"|mask_mobile }}
+                        {% endif %}
+                    )</span>
                 {% endif %}
             </div>
             <div class="members-list text-center">

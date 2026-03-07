@@ -70,6 +70,49 @@ def _sisters_summary(sisters):
     return ' ; '.join(parts)
 
 
+def _mask_mobile_value(value):
+    if not value:
+        return value
+    val_str = str(value)
+    if len(val_str) <= 4:
+        return value
+    return '*' * (len(val_str) - 4) + val_str[-4:]
+
+
+def _mask_family_data(data):
+    """Deep copy and mask all mobile numbers in the family data dict."""
+    import copy
+    masked_data = copy.deepcopy(data)
+    
+    # Root level
+    if 'മൊബൈൽ നമ്പർ' in masked_data:
+        masked_data['മൊബൈൽ നമ്പർ'] = _mask_mobile_value(masked_data['മൊബൈൽ നമ്പർ'])
+    if 'മൊബൈൽ നമ്പർ 2' in masked_data:
+        masked_data['മൊബൈൽ നമ്പർ 2'] = _mask_mobile_value(masked_data['മൊബൈൽ നമ്പർ 2'])
+        
+    # Children
+    for child in masked_data.get('മക്കളുടെ വിവരം', []):
+        if 'മൊബൈൽ നമ്പർ' in child:
+            child['മൊബൈൽ നമ്പർ'] = _mask_mobile_value(child['മൊബൈൽ നമ്പർ'])
+        if 'മൊബൈൽ നമ്പർ 2' in child:
+            child['മൊബൈൽ നമ്പർ 2'] = _mask_mobile_value(child['മൊബൈൽ നമ്പർ 2'])
+        if 'ഭാര്യയുടെ മൊബൈൽ' in child:
+            child['ഭാര്യയുടെ മൊബൈൽ'] = _mask_mobile_value(child['ഭാര്യയുടെ മൊബൈൽ'])
+            
+    # Sisters
+    sisters_key = 'സഹോദരിമാരുടെ വിവരങ്ങൾ'
+    for k in masked_data.keys():
+        if k.strip() == sisters_key:
+            for sister in masked_data[k]:
+                if 'മൊബൈൽ നമ്പർ' in sister:
+                    sister['മൊബൈൽ നമ്പർ'] = _mask_mobile_value(sister['മൊബൈൽ നമ്പർ'])
+                if 'മൊബൈൽ നമ്പർ 2' in sister:
+                    sister['മൊബൈൽ നമ്പർ 2'] = _mask_mobile_value(sister['മൊബൈൽ നമ്പർ 2'])
+            break
+            
+    return masked_data
+
+
 def _family_to_csv_row(family):
     data = family.family_json
     children = data.get('മക്കളുടെ വിവരം', [])
@@ -395,9 +438,14 @@ class ExportPoster(View):
     def get(self, request, pk):
         from .poster import render_family_poster
         family = get_object_or_404(Family, pk=pk)
-        jpg_bytes = render_family_poster(family.family_json)
+        
+        data = family.family_json
+        if not request.user.is_authenticated:
+            data = _mask_family_data(data)
+            
+        jpg_bytes = render_family_poster(data)
         response = HttpResponse(jpg_bytes, content_type='image/jpeg')
-        head_name = family.family_json.get('ഗൃഹനാഥന്റെ പേര്', 'family')
+        head_name = data.get('ഗൃഹനാഥന്റെ പേര്', 'family')
         # Safe ASCII filename
         safe_name = f"poster_{family.pk}.jpg"
         response['Content-Disposition'] = f'attachment; filename="{safe_name}"'
