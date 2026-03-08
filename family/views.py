@@ -218,7 +218,7 @@ class FamilyListView(ListView):
         if q:
             if q.isdigit():
                 # Search by Form Number
-                qs = qs.filter(**{"family_json__ഫോം നമ്പർ__icontains": q})
+                qs = qs.filter(**{"family_json__ഫോം നമ്പർ": q})
             else:
                 # Search by Name
                 qs = qs.filter(**{"family_json__ഗൃഹനാഥന്റെ പേര്__icontains": q})
