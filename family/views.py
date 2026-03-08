@@ -212,7 +212,7 @@ class FamilyListView(ListView):
     paginate_by = 20
 
     def get_queryset(self):
-        qs = Family.objects.all().order_by('-created_at')
+        qs = Family.objects.all().order_by('created_at')
         q = self.request.GET.get('q', '').strip()
 
         if q:
