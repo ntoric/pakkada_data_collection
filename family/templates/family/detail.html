@@ -8,7 +8,7 @@
 {% with data=family.family_json %}
 
 <!-- Page header -->
-<div class="d-flex align-items-start justify-content-between mb-4 flex-wrap gap-2">
+<div class="d-flex align-items-start justify-content-between mb-4 mt-4 flex-wrap gap-2">
     <div>
         <h1 class="page-heading">
             <i class="bi bi-card-text me-2"></i>{{ data|get_value:"ഗൃഹനാഥന്റെ പേര്" }}
@@ -222,7 +222,7 @@
 <div class="card section-card mb-4">
     <div class="card-header">
         <i class="bi bi-people me-2"></i>മക്കളുടെ വിവരം
-        <span class="badge bg-white text-success ms-2">{{ children|length }}</span>
+        <span class="badge bg-white text-primary ms-2">{{ children|length }}</span>
     </div>
     <div class="card-body p-0">
         <div class="table-responsive">
@@ -248,7 +248,7 @@
                             {% if child|get_value:"ബന്ധം" == "മകൻ" %}
                             <span class="badge bg-primary">{{ child|get_value:"ബന്ധം" }}</span>
                             {% else %}
-                            <span class="badge bg-info">{{ child|get_value:"ബന്ധം" }}</span>
+                            <span class="badge bg-outline-accent">{{ child|get_value:"ബന്ധം" }}</span>
                             {% endif %}
                         </td>
                         <td class="fw-semibold">{{ child|get_value:"പേര്"|default:"—" }}</td>
@@ -316,7 +316,7 @@
 <div class="card section-card mb-4">
     <div class="card-header">
         <i class="bi bi-person-hearts me-2"></i>കെട്ടിച്ചയച്ച പെൺമക്കൾ
-        <span class="badge bg-white text-success ms-2">{{ sisters|length }}</span>
+        <span class="badge bg-white text-primary ms-2">{{ sisters|length }}</span>
     </div>
     <div class="card-body p-0">
         <div class="table-responsive">

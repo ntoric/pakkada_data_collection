@@ -16,62 +16,101 @@
     {% webpush_header %}
     <style>
         :root {
-            --primary: #1d6f42;
-            --primary-light: #28a745;
-            --primary-dark: #155230;
-            --accent: #f0a500;
-            --surface: #f8f9fa;
-            --card-shadow: 0 2px 12px rgba(0,0,0,0.08);
+            --primary: #1B3C35; /* Forest Green */
+            --primary-light: #2D584F;
+            --primary-dark: #0d1a16;
+            --accent: #C5A059; /* Heritage Gold */
+            --surface: #FDFBF7; /* Cream */
+            --secondary: #F5F1E9; /* Soft Beige */
+            --card-shadow: 0 4px 20px rgba(0,0,0,0.06);
+            --text-main: #1A2B27;
+            --text-dim: #4A5568;
         }
 
         body {
             font-family: 'Noto Sans Malayalam', 'Inter', sans-serif;
-            background-color: #f0f4f8;
-            color: #212529;
+            background-color: var(--surface);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
         }
 
         /* ── Navbar ── */
         .navbar {
-            background: linear-gradient(135deg, var(--primary-dark), var(--primary));
-            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            background: var(--primary) !important;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            border-bottom: 2px solid var(--accent);
+            padding: 0.8rem 0;
         }
         .navbar-brand {
             font-weight: 700;
-            font-size: 1.2rem;
-            letter-spacing: 0.02em;
+            font-size: 1.3rem;
+            color: var(--accent) !important;
         }
         .navbar-brand span {
-            color: var(--accent);
+            color: #fff;
+        }
+        .nav-link {
+            color: var(--accent) !important;
+            font-weight: 600;
+        }
+        .nav-link:hover {
+            color: #fff !important;
         }
 
         /* ── Cards ── */
         .card {
-            border: none;
-            border-radius: 12px;
+            border: 1px solid rgba(27, 60, 53, 0.1);
+            border-radius: 15px;
             box-shadow: var(--card-shadow);
+            background: #fff;
         }
         .card-header {
-            border-radius: 12px 12px 0 0 !important;
-            font-weight: 600;
-            font-size: 1rem;
+            border-radius: 15px 15px 0 0 !important;
+            font-weight: 700;
+            font-size: 1.1rem;
+            padding: 1rem 1.5rem;
         }
         .section-card .card-header {
-            background: linear-gradient(90deg, var(--primary), var(--primary-light));
+            background: var(--primary);
             color: #fff;
+            border-bottom: 2px solid var(--accent);
         }
 
         /* ── Buttons ── */
         .btn-primary {
-            background: var(--primary);
+            background-color: var(--primary);
             border-color: var(--primary);
+            font-weight: 600;
+            padding: 0.5rem 1.5rem;
+            border-radius: 10px;
+            transition: all 0.3s ease;
         }
         .btn-primary:hover {
-            background: var(--primary-dark);
-            border-color: var(--primary-dark);
+            background-color: #255248;
+            border-color: #255248;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(27, 60, 53, 0.2);
         }
         .btn-success {
-            background: var(--primary-light);
+            background-color: var(--primary-light);
             border-color: var(--primary-light);
+            font-weight: 600;
+            border-radius: 10px;
+        }
+        .btn-outline-primary {
+            color: var(--accent);
+            border-color: var(--accent);
+            font-weight: 600;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+        .btn-outline-primary:hover {
+            background-color: var(--accent);
+            border-color: var(--accent);
+            color: #fff;
+            transform: translateY(-2px);
         }
 
         .bg-primary {
@@ -123,38 +162,45 @@
 
         /* ── Page heading ── */
         .page-heading {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--primary-dark);
+            color: var(--primary);
+            font-weight: 800;
+            margin-bottom: 0.25rem;
+            font-family: 'Noto Sans Malayalam', sans-serif;
+            font-size: 1.8rem;
         }
         .page-subheading {
-            color: #6c757d;
-            font-size: 0.9rem;
+            color: var(--accent);
+            font-weight: 700;
+            font-size: 1rem;
+            letter-spacing: 0.05em;
         }
 
         /* ── Detail view ── */
         .detail-label {
-            font-size: 0.78rem;
-            font-weight: 600;
+            font-size: 0.8rem;
+            font-weight: 700;
             text-transform: uppercase;
-            letter-spacing: 0.06em;
-            color: #6c757d;
-            margin-bottom: 2px;
+            letter-spacing: 0.08em;
+            color: var(--accent);
+            margin-bottom: 4px;
         }
         .detail-value {
-            font-size: 1rem;
-            color: #1a202c;
+            font-size: 1.1rem;
+            color: var(--text-main);
+            font-weight: 500;
         }
 
         /* ── Table ── */
         .table th {
             background: var(--primary);
             color: #fff;
-            font-weight: 600;
-            font-size: 0.88rem;
+            padding: 1rem;
+            border-bottom: 3px solid var(--accent) !important;
+            font-weight: 700;
+            font-size: 0.95rem;
         }
         .table-hover tbody tr:hover {
-            background-color: #e8f5e9;
+            background-color: var(--secondary);
         }
 
         /* ── JSON viewer ── */
@@ -213,15 +259,38 @@
             .section-card { margin-bottom: 1.5rem !important; }
         }
 
-        /* Mobile-list card style */
+        /* ── Mobile-list card style ── */
         .family-mobile-card {
             background: #fff;
-            border-radius: 10px;
-            box-shadow: 0 1px 6px rgba(0,0,0,0.07);
-            padding: 0.85rem 1rem;
-            margin-bottom: 0.6rem;
+            border-radius: 15px;
+            border: 1px solid rgba(27, 60, 53, 0.08);
+            box-shadow: var(--card-shadow);
+            padding: 1.25rem;
+            margin-bottom: 1.2rem;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
-        .family-mobile-card .actions { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 0.6rem; }
+        .family-mobile-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(27, 60, 53, 0.1);
+        }
+        .family-mobile-card .actions { 
+            display: flex; 
+            gap: 8px; 
+            flex-wrap: wrap; 
+            margin-top: 1rem;
+            padding-top: 0.8rem;
+            border-top: 1px solid rgba(0,0,0,0.05);
+        }
+
+        /* ── Utilities ── */
+        .bg-outline-accent {
+            background: transparent;
+            color: var(--accent);
+            border: 1px solid var(--accent);
+        }
+        .fw-600 { font-weight: 600; }
+        .text-primary { color: var(--primary) !important; }
+        .text-accent { color: var(--accent) !important; }
         
         /* Webpush Toggle Styling */
         .webpush-toggle {
@@ -317,14 +386,14 @@
     </div>
 
     <!-- Main content -->
-    <main class="{% block main_class %}container{% endblock %} pb-5">
+    <main class="{% block main_class %}container{% endblock %} pb-5 flex-grow-1">
         {% block content %}{% endblock %}
     </main>
 
     <!-- Footer -->
-    <footer class="text-center py-4">
+    <footer class="text-center py-4 mt-auto">
         <div class="container">
-            <span><a href="https://ntoric.com">ntoric.com</a> © 2026 പാക്കട കുടുംബം &mdash; All entries stored securely.</span>
+            <span class="text-muted small"><a href="https://ntoric.com" class="text-decoration-none text-accent fw-600">ntoric.com</a> © 2026 പാക്കട കുടുംബം &mdash; All entries stored securely.</span>
         </div>
     </footer>
 

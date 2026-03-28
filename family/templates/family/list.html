@@ -65,7 +65,9 @@
             </div>
             <div class="col-md-2">
                 <div class="d-flex gap-1">
-                    <button class="btn btn-primary flex-grow-1" type="submit">തിരയുക</button>
+                    <button class="btn btn-primary flex-grow-1" type="submit">
+                        <i class="bi bi-search me-1"></i>തിരയുക
+                    </button>
                     {% if search_query %}
                     <a href="{% url 'family:list' %}" class="btn btn-outline-secondary">
                         <i class="bi bi-x-lg"></i>
@@ -87,9 +89,9 @@
             <div>
                 <div class="fw-bold">{{ family.family_json|get_value:"ഗൃഹനാഥന്റെ പേര്" }}</div>
                 <div class="text-muted small mt-1">
-                    <span class="badge bg-secondary me-1">ഫോം {{ family.family_json|get_value:"ഫോം നമ്പർ" }}</span>
-                    <span class="badge bg-success me-1">വാർഡ് {{ family.family_json|get_value:"വാർഡ്" }}</span>
-                    {{ family.family_json|get_value:"പഞ്ചായത്ത്" }}
+                    <span class="badge bg-primary me-1">ഫോം {{ family.family_json|get_value:"ഫോം നമ്പർ" }}</span>
+                    <span class="badge bg-outline-accent me-1">വാർഡ് {{ family.family_json|get_value:"വാർഡ്" }}</span>
+                    <span class="text-primary fw-600">{{ family.family_json|get_value:"പഞ്ചായത്ത്" }}</span>
                 </div>
                 <div class="small mt-1 text-muted">
                     <span class="me-2">ഭാര്യ: <span class="text-dark">{{ family.family_json|get_value:"ഭാര്യയുടെ പേര്"|default:"-" }}</span></span>
@@ -178,7 +180,7 @@
                             <strong>{{ family.family_json|get_value:"ഗൃഹനാഥന്റെ പേര്" }}</strong>
                         </td>
                         <td>
-                            <span class="badge bg-secondary">
+                            <span class="badge bg-primary">
                                 {{ family.family_json|get_value:"ഫോം നമ്പർ" }}
                             </span>
                         </td>
