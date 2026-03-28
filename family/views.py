@@ -220,8 +220,12 @@ class FamilyListView(ListView):
                 # Search by Form Number
                 qs = qs.filter(**{"family_json__ഫോം നമ്പർ": q})
             else:
-                # Search by Name
-                qs = qs.filter(**{"family_json__ഗൃഹനാഥന്റെ പേര്__icontains": q})
+                # Search by Name (Malayalam and Latin Search Index)
+                from django.db.models import Q
+                qs = qs.filter(
+                    Q(**{"family_json__ഗൃഹനാഥന്റെ പേര്__icontains": q}) |
+                    Q(search_index__icontains=q)
+                )
             
         return qs
 
@@ -457,7 +461,43 @@ class LandingView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['total_families'] = Family.objects.count()
+        all_families = Family.objects.all()
+        total_families = all_families.count()
+        total_members = 0
+
+        for fam in all_families:
+            data = fam.family_json
+            # 1. Head of house
+            total_members += 1
+            
+            # 2. Children (മക്കളുടെ വിവരം)
+            children = data.get('മക്കളുടെ വിവരം', [])
+            total_members += len(children)
+            
+            # 3. Married Daughters (സഹോദരിമാരുടെ വിവരങ്ങൾ)
+            sisters = data.get('സഹോദരിമാരുടെ വിവരങ്ങൾ', [])
+            total_members += len(sisters)
+            
+            # 4. Grandchildren from children
+            for child in children:
+                kids = child.get('കുട്ടികൾ', {})
+                try:
+                    total_members += int(kids.get('5 വയസിനു മുകളിൽ', 0) or 0)
+                    total_members += int(kids.get('5 വയസിനു താഴെ', 0) or 0)
+                except (ValueError, TypeError):
+                    pass
+            
+            # 5. Grandchildren from married daughters (sisters)
+            for sister in sisters:
+                kids = sister.get('കുട്ടികൾ', {})
+                try:
+                    total_members += int(kids.get('5 വയസിനു മുകളിൽ', 0) or 0)
+                    total_members += int(kids.get('5 വയസിനു താഴെ', 0) or 0)
+                except (ValueError, TypeError):
+                    pass
+
+        context['total_families'] = total_families
+        context['total_members'] = total_members
         return context
 
 
@@ -497,6 +537,97 @@ class ExportAllCSV(SuperuserRequiredMixin, View):
         for fam in Family.objects.all().order_by('id'):
             writer.writerow(_family_to_csv_row(fam))
         return response
+
+
+class ImportJSONView(SuperuserRequiredMixin, View):
+    """Handle JSON family data import."""
+    template_name = 'family/import_json.html'
+
+    def get(self, request):
+        return render(request, self.template_name)
+
+    def post(self, request):
+        file = request.FILES.get('json_file')
+        if not file:
+            messages.error(request, "ദയവായി ഒരു JSON ഫയൽ തിരഞ്ഞെടുക്കുക.")
+            return render(request, self.template_name)
+
+        try:
+            raw_data = file.read().decode('utf-8')
+            data = json.loads(raw_data)
+        except Exception as e:
+            messages.error(request, f"JSON ഫയൽ വായിക്കുന്നതിൽ പിശക്: {str(e)}")
+            return render(request, self.template_name)
+
+        # Handle both single record and bulk record formats
+        if isinstance(data, dict):
+            # Single record export format: {"id": ..., "data": {...}}
+            if 'data' in data:
+                records = [data]
+            else:
+                # Direct record format: {"പഞ്ചായത്ത്": ...}
+                records = [{'data': data}]
+        elif isinstance(data, list):
+            # Bulk export format: [{"id": ..., "data": {...}}, ...]
+            records = data
+        else:
+            messages.error(request, "അസാധുവായ JSON ഫോർമാറ്റ്.")
+            return render(request, self.template_name)
+
+        created_count = 0
+        updated_count = 0
+        error_count = 0
+
+        for item in records:
+            try:
+                # Extract the family data. Bulk/Single export puts it in 'data' key.
+                if isinstance(item, dict) and 'data' in item:
+                    fam_json = item['data']
+                    fam_id = item.get('id')
+                else:
+                    fam_json = item
+                    fam_id = None
+
+                if fam_id:
+                    # Try to update existing record by ID
+                    family, created = Family.objects.update_or_create(
+                        id=fam_id,
+                        defaults={'family_json': fam_json}
+                    )
+                else:
+                    # Check for existing record by Form Number if present in JSON
+                    form_no = fam_json.get('ഫോം നമ്പർ')
+                    if form_no:
+                        # Find existing record with same form number
+                        # SQLite-compatible lookup for specific key in JSONField
+                        existing = Family.objects.filter(**{"family_json__ഫോം നമ്പർ": str(form_no)}).first()
+                        if existing:
+                            existing.family_json = fam_json
+                            existing.save()
+                            updated_count += 1
+                            continue
+                    
+                    Family.objects.create(family_json=fam_json)
+                    created = True
+
+                if created:
+                    created_count += 1
+                else:
+                    updated_count += 1
+            except Exception:
+                error_count += 1
+
+        if created_count > 0 or updated_count > 0:
+            msg = f"വിജകരമായി {created_count} പുതിയ റെക്കോർഡുകൾ ചേർത്തു, {updated_count} എണ്ണം അപ്ഡേറ്റ് ചെയ്തു."
+            if error_count > 0:
+                msg += f" {error_count} എണ്ണത്തിൽ പിശക് സംഭവിച്ചു."
+            messages.success(request, msg)
+        elif error_count > 0:
+            messages.error(request, f"{error_count} റെക്കോർഡുകൾ ഇംപോർട്ട് ചെയ്യുന്നതിൽ പിശക് സംഭവിച്ചു.")
+        else:
+            messages.info(request, "ഇംപോർട്ട് ചെയ്യാൻ റെക്കോർഡുകളൊന്നും കണ്ടെത്തിയില്ല.")
+
+        return redirect('family:list')
 
 
 class ExportSingleJSON(SuperuserRequiredMixin, View):

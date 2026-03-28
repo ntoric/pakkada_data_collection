@@ -6,11 +6,12 @@ services:
     ports:
       - "8006:8000"
     volumes:
-      # Persist the SQLite database, photos, and uploaded fonts across container restarts
+      # Persist the binary, photos, and uploaded fonts across container restarts
       - ./db.sqlite3:/app/db.sqlite3
       - ./media:/app/media
+      - .:/app
     command: 
-      - python manage.py runserver
+      - python manage.py runserver 0.0.0.0:8000
     environment:
       - DJANGO_SETTINGS_MODULE=pakkada.settings
       - SECRET_KEY=${SECRET_KEY:-django-insecure-change-me-in-production}

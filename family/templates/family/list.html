@@ -6,7 +6,7 @@
 {% block main_class %}container-fluid px-4{% endblock %}
 
 {% block content %}
-<div class="mb-4">
+<div class="mb-4 mt-4">
     <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-md-between gap-3 mb-3">
         <div>
             <h1 class="page-heading"><i class="bi bi-table me-2"></i>കുടുംബ ഡേറ്റ - എല്ലാ രേഖകൾ</h1>
@@ -30,6 +30,12 @@
                     <li>
                         <a class="dropdown-item" href="{% url 'family:export_all_csv' %}">
                             <i class="bi bi-filetype-csv me-2 text-success"></i>CSV ആയി Export ചെയ്യുക
+                        </a>
+                    </li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li>
+                        <a class="dropdown-item" href="{% url 'family:import_json' %}">
+                            <i class="bi bi-file-earmark-arrow-up me-2 text-primary"></i>JSON ഇംപോർട്ട് ചെയ്യുക
                         </a>
                     </li>
                 </ul>

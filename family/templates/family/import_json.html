@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block title %}ഡേറ്റ ഇംപോർട്ട് - പാക്കട{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center mt-5">
+    <div class="col-md-6">
+        <div class="card shadow-sm">
+            <div class="card-header bg-primary text-white py-3">
+                <h5 class="mb-0"><i class="bi bi-file-earmark-arrow-up me-2"></i>JSON ഡേറ്റ ഇംപോർട്ട്</h5>
+            </div>
+            <div class="card-body p-4">
+                <p class="text-muted mb-4">
+                    മുമ്പ് എക്സ്പോർട്ട് ചെയ്ത JSON ഫയലുകൾ ഉപയോഗിച്ച് ഡേറ്റ ഇംപോർട്ട് ചെയ്യാം. 
+                    റെക്കോർഡുകൾ നിലവിലുണ്ടെങ്കിൽ അവ അപ്ഡേറ്റ് ചെയ്യപ്പെടും (ID അടിസ്ഥാനമാക്കി), അല്ലെങ്കിൽ പുതിയതായി ചേർക്കും.
+                </p>
+
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="mb-4">
+                        <label for="json_file" class="form-label fw-bold">JSON ഫയൽ തിരഞ്ഞെടുക്കുക</label>
+                        <input class="form-control" type="file" id="json_file" name="json_file" accept=".json" required>
+                        <div class="form-text mt-2">
+                            ശ്രദ്ധിക്കുക: ഫയൽ .json ഫോർമാറ്റിൽ ആയിരിക്കണം.
+                        </div>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary py-2">
+                            <i class="bi bi-cloud-upload me-2"></i>ഇംപോർട്ട് ആരംഭിക്കുക
+                        </button>
+                        <a href="{% url 'family:list' %}" class="btn btn-outline-secondary">
+                            മടങ്ങുക
+                        </a>
+                    </div>
+                </form>
+
+                <hr class="my-4">
+
+                <div class="bg-light p-3 rounded">
+                    <h6 class="fw-bold mb-2 small text-uppercase text-muted">JSON ഘടന (Example Structure):</h6>
+                    <pre class="mb-0 small" style="max-height: 200px; overflow-y: auto;">
+[
+  {
+    "id": 1,
+    "data": {
+      "പഞ്ചായത്ത്": "...",
+      "വാർഡ്": "...",
+      "ഫോം നമ്പർ": "123",
+      "ഗൃഹനാഥന്റെ പേര്": "..."
+      ...
+    }
+  }
+]
+                    </pre>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

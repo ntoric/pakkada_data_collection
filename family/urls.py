@@ -11,9 +11,10 @@ urlpatterns = [
     path('<int:pk>/', views.FamilyDetailView.as_view(), name='detail'),
     path('success/', views.SuccessView.as_view(), name='success'),
 
-    # Bulk exports
+    # Bulk exports/imports
     path('export/json/', views.ExportAllJSON.as_view(), name='export_all_json'),
     path('export/csv/', views.ExportAllCSV.as_view(), name='export_all_csv'),
+    path('import/json/', views.ImportJSONView.as_view(), name='import_json'),
 
     # Single record exports
     path('<int:pk>/export/json/', views.ExportSingleJSON.as_view(), name='export_json'),

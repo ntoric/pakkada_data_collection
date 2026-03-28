@@ -233,13 +233,18 @@
         }
     </style>
     {% block extra_head %}{% endblock %}
+    <!-- Favicon & Meta Image -->
+    <link rel="icon" type="image/png" href="{% static 'images/favicon.png' %}">
+    <meta property="og:image" content="{% static 'images/logo.jpg' %}">
+    <meta name="twitter:image" content="{% static 'images/logo.jpg' %}">
 </head>
 <body>
     <!-- Navbar -->
-    <nav class="navbar navbar-dark navbar-expand-lg mb-4">
+    <nav class="navbar navbar-dark navbar-expand-lg">
         <div class="container">
-            <a class="navbar-brand" href="{% url 'family:landing' %}">
-                <i class="bi bi-people-fill me-2"></i>പാക്കട <span>കുടുംബം</span>
+            <a class="navbar-brand d-flex align-items-center" href="{% url 'family:landing' %}">
+                <img src="{% static 'images/logo.jpg' %}" alt="Pakkada Family Logo" class="me-2" style="height: 45px; width: auto; border-radius: 5px;">
+                {% comment %} <span class="d-none d-sm-inline">പാക്കട <span>കുടുംബം</span></span> {% endcomment %}
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
                 <span class="navbar-toggler-icon"></span>

@@ -1,0 +1,23 @@
+// static/sw.js
+
+self.addEventListener('push', function (event) {
+    const eventData = event.data ? event.data.json() : {};
+    const title = eventData.head || 'New Notification';
+    const options = {
+        body: eventData.body || 'You have a new update.',
+        icon: eventData.icon || '/static/images/favicon.png',
+        badge: '/static/images/favicon.png',
+        data: {
+            url: eventData.url || '/'
+        }
+    };
+
+    event.waitUntil(self.registration.showNotification(title, options));
+});
+
+self.addEventListener('notificationclick', function (event) {
+    event.notification.close();
+    event.waitUntil(
+        clients.openWindow(event.notification.data.url)
+    );
+});
